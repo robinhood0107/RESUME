@@ -1,0 +1,9 @@
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ include.profile.name | escape }} | {{ include.profile.title | escape }}</title>
+  {% seo title=false %}
+  <link rel="alternate" hreflang="ko" href="{{ '/' | absolute_url }}">
+  <link rel="alternate" hreflang="en" href="{{ '/en/' | absolute_url }}">
+  <link rel="stylesheet" href="{{ '/assets/main.css' | relative_url }}">
+</head>

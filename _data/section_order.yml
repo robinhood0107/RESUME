@@ -1,0 +1,10 @@
+- id: skills
+  title: Skills
+- id: experience
+  title: Experience
+- id: projects
+  title: Projects
+- id: external_activities
+  title: External Activities
+- id: education
+  title: Education

@@ -1,0 +1,14 @@
+{% if include.language == 'en' %}{% assign pdf_name = 'resume-en.pdf' %}{% else %}{% assign pdf_name = 'resume-ko.pdf' %}{% endif %}
+<nav class="resume-tools container no-print" aria-label="Resume tools">
+  <div class="language-links">
+    <a href="{{ '/' | relative_url }}" {% if include.language == 'ko' %}aria-current="page"{% endif %}>한국어</a>
+    <span aria-hidden="true">|</span>
+    <a href="{{ '/en/' | relative_url }}" {% if include.language == 'en' %}aria-current="page"{% endif %}>English</a>
+  </div>
+  <a class="pdf-open-link" href="{{ '/assets/pdf/' | append: pdf_name | relative_url }}" target="_blank" rel="noopener">
+    {% if include.language == 'en' %}Open / Print PDF{% else %}PDF 보기·인쇄{% endif %}
+  </a>
+  <a class="pdf-link" href="{{ '/assets/pdf/' | append: pdf_name | relative_url }}" download>
+    {% if include.language == 'en' %}Download PDF{% else %}PDF 다운로드{% endif %}
+  </a>
+</nav>

@@ -1,0 +1,24 @@
+{% assign language = page.lang | default: 'ko' %}
+{% assign language_data = site.data[language] %}
+{% assign profile = language_data.profile %}
+<!doctype html>
+<html lang="{{ language }}">
+{% include resume/head.html profile=profile %}
+<body>
+  {% include resume/tools.html language=language %}
+  {% include resume/header.html profile=profile %}
+  <main class="page-content" aria-label="Resume">
+    <div class="wrapper">
+      {% include resume/about.html profile=profile %}
+      {% for section in site.data.section_order %}
+        {% assign entries = language_data[section.id] %}
+        <section class="container list-container" aria-labelledby="section-{{ section.id }}">
+          <h3 id="section-{{ section.id }}">{{ section.title | escape }}</h3>
+          {% include section-list.html content=entries %}
+        </section>
+      {% endfor %}
+    </div>
+  </main>
+  {% include resume/footer.html profile=profile %}
+</body>
+</html>

@@ -1,0 +1,29 @@
+- layout: left
+  title: document-translate-myfix
+  sub_title: Personal open-source fork · local OCR and translation runtimes
+  caption: Apr 2026 – Present
+  link: https://github.com/robinhood0107/document-translate-myfix
+  link_text: GitHub
+  description: |
+    * Implemented Docker start, stop and resource-release paths so OCR and translation models could use the GPU in turn.
+- layout: left
+  title: Screening Humanity
+  sub_title: Team prototype · FastAPI back-end / local AI server
+  caption: Jan 2026
+  link: https://github.com/madcamp-Screening-Humanity/madcamp-Screening-Humanity-AI-Server
+  link_text: AI Server GitHub
+  additional_links:
+    - title: Backend GitHub
+      icon: fab fa-github
+      url: https://github.com/madcamp-Screening-Humanity/madcamp-Screening-Humanity-BACK
+  description: |
+    * Changed chat and speech APIs and the vLLM, Ollama and GPT-SoVITS setup and switching scripts.
+    * GPU memory limits required choosing either vLLM or Ollama at a time. The final demo used the Ollama path.
+- layout: left
+  title: Personal NAS and OCI Self-Hosting
+  sub_title: Personal infrastructure operations
+  caption: Winter 2022 – Present
+  description: |
+    * Self-hosted a Kavita library, Jellyfin media service and personal projects with Docker on a NAS and OCI Linux VM.
+    * Page turns in remote Kavita reading were delayed, so I set up image and PDF caching and next-page preloading. When preloading failed due to a certificate-name mismatch, I aligned TLS SNI and HTTP Host and checked response, cache and queue records.
+    * Tested XPEnology on Proxmox, then removed the Proxmox layer. XPEnology is now the main NAS, with services running in Docker.

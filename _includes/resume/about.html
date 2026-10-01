@@ -1,0 +1,13 @@
+<section class="container intro-container" aria-labelledby="about-title">
+  <h3 id="about-title">{{ include.profile.about_title | escape }}</h3>
+  <div class="row clearfix">
+    {% if site.about_profile_image %}
+    <div class="col-xs-12 col-sm-4 col-md-3 no-print">
+      <span class="profile-img" role="img" aria-label="{{ include.profile.name | escape }}" style="background-image: url('{{ site.about_profile_image | relative_url }}')"></span>
+    </div>
+    {% endif %}
+    <div class="col-xs-12 {% if site.about_profile_image %}col-sm-8 col-md-9{% else %}col-sm-12{% endif %} col-print-12">
+      {{ include.profile.about_content | strip | markdownify }}
+    </div>
+  </div>
+</section>

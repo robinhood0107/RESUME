@@ -1,0 +1,64 @@
+name: Build and deploy resume
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PDF font and data parser
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-nanum
+          python -m pip install 'PyYAML==6.0.2'
+      - name: Validate both languages and export Typst data
+        run: python scripts/export_typst_data.py
+      - name: Build Korean and English PDFs from the same content
+        run: |
+          FONT_FILE="$(fc-match NanumGothic --format '%{file}')"
+          test -f "$FONT_FILE"
+          mkdir -p assets/pdf
+          docker run --rm -v "$PWD":/data -v "$FONT_FILE":/fonts/NanumGothic.ttf:ro -w /data ghcr.io/typst/typst:0.14.2 compile --root /data --font-path /fonts --input lang=ko pdf/resume.typ assets/pdf/resume-ko.pdf
+          docker run --rm -v "$PWD":/data -v "$FONT_FILE":/fonts/NanumGothic.ttf:ro -w /data ghcr.io/typst/typst:0.14.2 compile --root /data --font-path /fonts --input lang=en pdf/resume.typ assets/pdf/resume-en.pdf
+          test -s assets/pdf/resume-ko.pdf
+          test -s assets/pdf/resume-en.pdf
+      - name: Build Jekyll site
+        env:
+          JEKYLL_ENV: production
+        run: bundle exec jekyll build --destination _site
+      - name: Check paired pages and PDFs
+        run: |
+          test -s _site/index.html
+          test -s _site/en/index.html
+          test -s _site/assets/pdf/resume-ko.pdf
+          test -s _site/assets/pdf/resume-en.pdf
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

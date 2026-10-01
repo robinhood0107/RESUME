@@ -1,0 +1,26 @@
+repository: robinhood0107/RESUME
+url: https://robinhood0107.github.io
+baseurl: /RESUME
+remote_theme: sproogen/modern-resume-theme
+plugins:
+  - jekyll-seo-tag
+  - jekyll-remote-theme
+lang: ko
+version: 2
+darkmode: never
+email: pjj4678@gmail.com
+github_username: robinhood0107
+about_profile_image: assets/images/profile.jpg
+exclude:
+  - _private_research
+  - PROFILE_README.md
+  - README.md
+  - EDITING.md
+  - THIRD_PARTY_NOTICES.md
+  - Gemfile
+  - Gemfile.lock
+  - scripts
+  - pdf
+  - vendor
+  - _site
+  - _site_qa

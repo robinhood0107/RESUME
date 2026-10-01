@@ -1,0 +1,33 @@
+---
+---
+@import 'modern-resume-theme';
+
+.resume-tools {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.3rem;
+  padding-top: 1rem;
+  font-size: .9rem;
+}
+.language-links { display: flex; gap: .35rem; align-items: center; }
+.language-links a { color: #666; text-decoration: none; }
+.language-links a[aria-current='page'] { color: #222; font-weight: 700; }
+.pdf-link, .pdf-open-link {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #444;
+  padding: .4rem .65rem;
+  text-decoration: none;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.pdf-link:hover, .pdf-link:focus-visible, .pdf-open-link:hover, .pdf-open-link:focus-visible { border-color: #666; color: #111; }
+.header-container { padding-top: 1rem; }
+.intro-container .profile-img { background-position: center 42%; }
+@media (max-width: 600px) {
+  .resume-tools { justify-content: space-between; }
+  .header-container { padding-top: 0; }
+  .intro-container p { text-align: left; }
+}

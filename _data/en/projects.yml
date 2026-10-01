@@ -1,0 +1,79 @@
+- layout: left
+  title: AI Trading Coach with User-Defined Risk Rules
+  sub_title: Three-person capstone · PM / Decision Platform
+  caption: May 2026 – Oct 2026
+  link: https://github.com/robinhood0107/Capstone-AI-Trading-Coach
+  link_text: GitHub
+  description: |
+    * Requiring both the rules and model to say BUY left over half of offline sessions without a candidate. I changed the flow to rule-proposed candidates with a model SELL veto.
+    * Compared six combinations on the same 31 stocks and 5,362 sessions: no-candidate rate fell from 51.8% to 1.4%. I implemented the rule and added regression tests.
+    * Mock-order tests covered submission, fills, balance updates and duplicate prevention after user and safety checks.
+    * Separated financial sources, revisions, chunks and embeddings in PostgreSQL, with public/private retrieval and citation checks.
+    * Teammates owned LSTM training, the Return Engine and dashboard UX.
+- layout: left
+  title: Document and Image Translation Pipeline
+  sub_title: Personal open-source maintenance fork
+  caption: Apr 2026 – Present
+  link: https://github.com/robinhood0107/document-translate-myfix
+  link_text: GitHub
+  description: |
+    * Added local HunyuanOCR, PaddleOCR-VL and Gemma paths to comic-translate.
+    * Direct model requests cut OCR wall time from 60.2 to 8.3 seconds on the same six Japanese pages and 73 text regions; the final normalized OCR results matched.
+    * Stage caching reuses matching input, model and settings. A two-page first run plus identical rerun took 279.9 seconds without caching and 156.0 seconds with it.
+- layout: left
+  title: U.S. Stock Trading Simulation
+  sub_title: Two-person team · Back-end / deployment
+  caption: Jan 2026
+  link: https://github.com/madcamp02-web-project/madcamp02-Backend
+  link_text: Backend GitHub
+  description: |
+    * Built Spring Boot flows for orders, wallets, holdings and trade history. Price requests run outside DB transactions; balance and holding changes use locking and transactions.
+    * Cached prices with Redis and delivered them through WebSocket. I integrated a FastAPI AI server and deployment setup; a teammate owned the interface and design.
+- layout: left
+  title: KB AnsimVoice and Money Rules
+  sub_title: Three-person contest prototype · Agent / TTS
+  caption: Jul 2026 – Aug 2026
+  link: https://github.com/robinhood0107/kb-ansimvoice
+  link_text: Public GitHub
+  description: |
+    * Rechecked the amount, recipient and account in an AI-drafted transfer against the user's utterance and server data. Mismatches are not passed to the transfer flow.
+    * Rule-based code handles transfer decisions and one-time approval. I worked on the constrained agent, input checks and TTS, WebSocket and Docker integration.
+- layout: left
+  title: Net Zero Smart SCM
+  sub_title: Individual database course project
+  caption: Dec 2025
+  link: https://github.com/robinhood0107/Net_Zero_Smart_SCM
+  link_text: GitHub
+  description: |
+    * Built a Java, Spring Boot and PostgreSQL course project for supplier, order, delivery, inventory and carbon data.
+    * Kept order, delivery and inventory changes in one transaction, with database constraints and error handling to prevent inconsistent updates.
+- layout: left
+  title: OliveME Personal Color Android App
+  sub_title: Two-person team · Android architecture / data / integration
+  caption: May 2026 – Jun 2026
+  link: https://github.com/personal-color-app/personal_color_app
+  link_text: Team GitHub
+  description: |
+    * Built Android screens and storage flows with Kotlin, Jetpack Compose and Room, and connected AI and map APIs.
+    * Kept saved diagnoses and local guidance available when an external API or backend fails. A teammate shared the screen design work.
+- layout: left
+  title: College Student Flea Market
+  caption: Nov 2025 – Dec 2025
+  link: https://github.com/robinhood0107/College-Student-Flea-Market
+  link_text: GitHub
+  description: |
+    * Built session authentication, product and comment flows, search and account pages with Express, EJS and MySQL in a two-person course project.
+- layout: left
+  title: FPGA Morse Code Transceiver
+  caption: Nov 2025 – Dec 2025
+  link: https://github.com/robinhood0107/Morse_Term_Project
+  link_text: GitHub
+  description: |
+    * Connected Verilog state machines, clock division and transmit/receive modules to buttons, LEDs, seven-segment displays and a buzzer on an FPGA board.
+- layout: left
+  title: Busan Tourist Traffic Accident Analysis
+  caption: Jun 2025
+  link: https://github.com/robinhood0107/busan-tourist-traffic-accident-analysis
+  link_text: GitHub
+  description: |
+    * Combined visitor, transport facility and accident data around 50 Busan attractions, then published statistical analysis, maps, a notebook and a report.

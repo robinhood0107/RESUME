@@ -1,0 +1,16 @@
+<header class="container header-container">
+  <div class="row">
+    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-8 header-left">
+      <h1>{{ include.profile.name | escape }}</h1>
+      <h2>{{ include.profile.title | escape }}</h2>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 header-right">
+      <ul class="icons no-print">
+        <li><a href="https://github.com/{{ site.github_username | escape }}" class="button button--sacnite button--round-l" aria-label="GitHub"><i class="fab fa-github" aria-hidden="true"></i></a></li>
+        <li><a href="mailto:{{ site.email | escape }}" class="button button--sacnite button--round-l" aria-label="Email"><i class="fas fa-envelope" aria-hidden="true"></i></a></li>
+      </ul>
+      <p>Email: <a href="mailto:{{ site.email | escape }}">{{ site.email | escape }}</a></p>
+      <p>GitHub: <a href="https://github.com/{{ site.github_username | escape }}">github.com/{{ site.github_username | escape }}</a></p>
+    </div>
+  </div>
+</header>

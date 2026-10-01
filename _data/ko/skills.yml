@@ -1,0 +1,22 @@
+- layout: left
+  title: AI / LLM
+  description: |
+    * RAG: PostgreSQL·pgvector 자료 분리, 검색 권한 및 인용·숫자 재검증
+    * 로컬 OCR·LLM: Docker·llama.cpp에서 PaddleOCR-VL·HunyuanOCR·Gemma 실행 경로 연동, 단계별 캐시
+    * 팀 AI 서버: vLLM·Ollama·GPT-SoVITS의 Docker·GPU 설정 및 전환 스크립트 작성
+- layout: left
+  title: Back-end
+  description: |
+    * 주력: Java·Kotlin, Spring Boot, Python, FastAPI, PostgreSQL
+    * REST API, SQL, 트랜잭션·잠금·DB 제약조건, 오류·상태 전이 처리
+    * 사용 경험: MySQL, Redis, WebSocket/STOMP
+- layout: left
+  title: Infrastructure
+  description: |
+    * Docker, Linux, GitHub Actions, Nginx, NAS·OCI 개인 서비스 운영
+    * Windows 설치·실행 자동화, pytest·JUnit과 재현 가능한 성능 측정
+- layout: left
+  title: Others
+  description: |
+    * Kotlin Android·Jetpack Compose·Room 앱 프로젝트 경험
+    * Git·GitHub PR, 기술 문서와 프로젝트 간 API 계약 조율

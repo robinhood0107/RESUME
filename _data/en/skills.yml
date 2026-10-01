@@ -1,0 +1,22 @@
+- layout: left
+  title: AI / LLM
+  description: |
+    * RAG: PostgreSQL and pgvector storage, access-aware retrieval, citation and number checks
+    * Local OCR and LLM: connected PaddleOCR-VL, HunyuanOCR and Gemma runtimes through Docker and llama.cpp, with stage caching
+    * Team AI server: wrote Docker, GPU setup and switching scripts for vLLM, Ollama and GPT-SoVITS
+- layout: left
+  title: Back-end
+  description: |
+    * Primary: Java, Kotlin, Spring Boot, Python, FastAPI, PostgreSQL
+    * REST APIs, SQL, transactions, locking, database constraints, error and state handling
+    * Also used: MySQL, Redis, WebSocket/STOMP
+- layout: left
+  title: Infrastructure
+  description: |
+    * Docker, Linux, GitHub Actions, Nginx, personal NAS and OCI services
+    * Windows setup and run automation, pytest and JUnit, reproducible benchmarks
+- layout: left
+  title: Others
+  description: |
+    * Kotlin Android, Jetpack Compose and Room project experience
+    * Git, GitHub pull requests, technical documentation and cross-project API contracts

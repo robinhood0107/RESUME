@@ -1,0 +1,29 @@
+- layout: left
+  title: document-translate-myfix
+  sub_title: 개인 오픈소스 포크 · 로컬 OCR·번역 모델 실행
+  caption: 2026.04 ~ 현재
+  link: https://github.com/robinhood0107/document-translate-myfix
+  link_text: GitHub
+  description: |
+    * OCR 모델과 번역 모델을 GPU에서 번갈아 실행하도록 Docker 기동·중지와 자원 반환 경로를 구현했습니다.
+- layout: left
+  title: Screening Humanity
+  sub_title: 팀 프로토타입 · FastAPI 백엔드 / 로컬 AI 서버
+  caption: 2026.01
+  link: https://github.com/madcamp-Screening-Humanity/madcamp-Screening-Humanity-AI-Server
+  link_text: AI Server GitHub
+  additional_links:
+    - title: Backend GitHub
+      icon: fab fa-github
+      url: https://github.com/madcamp-Screening-Humanity/madcamp-Screening-Humanity-BACK
+  description: |
+    * 채팅·음성 API와 vLLM·Ollama·GPT-SoVITS 실행 설정·전환 스크립트를 수정했습니다.
+    * GPU 메모리 제약으로 vLLM과 Ollama 중 하나를 선택해 실행했고, 최종 시연은 Ollama 경로로 연결했습니다.
+- layout: left
+  title: NAS·OCI 개인 셀프호스팅
+  sub_title: 개인 운영 경험
+  caption: 2022년 겨울 ~ 현재
+  description: |
+    * NAS와 OCI Linux VM에서 Docker 기반으로 Kavita 개인 도서관, Jellyfin 미디어 서비스, 개인 프로젝트 등을 셀프호스팅했습니다.
+    * Kavita 원격 열람에서 페이지 전환 대기가 생겨 이미지·PDF 캐시와 다음 페이지 선로딩을 구성했습니다. 선로딩이 인증서 이름 불일치로 실패하자 요청의 SNI·Host를 맞췄고, 응답·캐시·대기열 기록으로 정상 처리를 확인했습니다.
+    * Proxmox 위 XPEnology 구성을 시험한 뒤 Proxmox 계층을 제거했습니다. 현재는 XPEnology를 메인 NAS로 두고 Docker로 서비스를 운영합니다.

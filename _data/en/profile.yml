@@ -1,0 +1,9 @@
+name: Jongjin Park
+title: Backend Engineer · AI Applications
+about_title: About Me
+about_content: |
+  I have worked on Spring Boot and PostgreSQL backends and Python-based AI integrations. In the <mark>AI Trading Coach</mark> capstone, I was PM and worked on the order-decision backend, connecting user rules, model signals and mock orders. Model signals can exclude candidates, while rule-based code determines order size and final approval.
+
+  I maintain a fork of <mark>comic-translate</mark>, where I worked on local OCR and translation runtimes, the OCR request path and caching for repeated work. In a <mark>stock trading simulation</mark>, I built Spring Boot flows for orders, wallets and holdings.
+
+  I self-host Kavita, Jellyfin and personal projects on a NAS and OCI. I check changes with tests and run records, and record the input and comparison conditions alongside performance results.

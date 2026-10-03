@@ -19,7 +19,3 @@ bash scripts/build_local.sh
 ## 문구 수정
 
 [EDITING.md](EDITING.md)에 수정할 파일과 빌드 방법을 정리했습니다.
-
-## 출처
-
-레이아웃은 [junho85/RESUME](https://github.com/junho85/RESUME)의 구성에서 참고했습니다. 해당 저장소의 소스는 복사하지 않았습니다. 사용한 테마와 라이선스는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 적었습니다.

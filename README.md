@@ -1,4 +1,4 @@
-# 박종진 이력서
+# Resume
 
 한국어·영어 웹 이력서와 Typst PDF입니다. 웹 화면은 [modern-resume-theme](https://github.com/sproogen/modern-resume-theme)를 사용합니다.
 

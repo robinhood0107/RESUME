@@ -57,23 +57,9 @@
     * Built Android screens and storage flows with Kotlin, Jetpack Compose and Room, and connected AI and map APIs.
     * Kept saved diagnoses and local guidance available when an external API or backend fails. A teammate shared the screen design work.
 - layout: left
-  title: College Student Flea Market
-  caption: Nov 2025 – Dec 2025
-  link: https://github.com/robinhood0107/College-Student-Flea-Market
-  link_text: GitHub
-  description: |
-    * Built session authentication, product and comment flows, search and account pages with Express, EJS and MySQL in a two-person course project.
-- layout: left
   title: FPGA Morse Code Transceiver
   caption: Nov 2025 – Dec 2025
   link: https://github.com/robinhood0107/Morse_Term_Project
   link_text: GitHub
   description: |
     * Connected Verilog state machines, clock division and transmit/receive modules to buttons, LEDs, seven-segment displays and a buzzer on an FPGA board.
-- layout: left
-  title: Busan Tourist Traffic Accident Analysis
-  caption: Jun 2025
-  link: https://github.com/robinhood0107/busan-tourist-traffic-accident-analysis
-  link_text: GitHub
-  description: |
-    * Combined visitor, transport facility and accident data around 50 Busan attractions, then published statistical analysis, maps, a notebook and a report.

@@ -57,23 +57,9 @@
     * Kotlin·Jetpack Compose·Room으로 Android 화면과 저장 흐름을 구성하고 AI·지도 API를 연동했습니다.
     * 외부 API나 백엔드가 실패해도 저장된 진단 이력과 로컬 안내를 볼 수 있게 했습니다. 화면 디자인은 팀원과 나누어 맡았습니다.
 - layout: left
-  title: 대학생 중고거래 게시판
-  caption: 2025.11 ~ 2025.12
-  link: https://github.com/robinhood0107/College-Student-Flea-Market
-  link_text: GitHub
-  description: |
-    * 2인 수업 프로젝트. Express·EJS·MySQL로 세션 인증, 상품·댓글·검색과 마이페이지를 구현하고 시연했습니다.
-- layout: left
   title: FPGA 모스부호 송수신기
   caption: 2025.11 ~ 2025.12
   link: https://github.com/robinhood0107/Morse_Term_Project
   link_text: GitHub
   description: |
     * Verilog 상태 기계, 클록 분주, 송신·수신 모듈을 FPGA 보드의 버튼·LED·7-segment·버저에 연결했습니다.
-- layout: left
-  title: 부산 관광지 교통사고 분석
-  caption: 2025.06
-  link: https://github.com/robinhood0107/busan-tourist-traffic-accident-analysis
-  link_text: GitHub
-  description: |
-    * 부산 관광지 50곳의 방문·교통시설·사고 데이터를 결합해 통계 분석과 지도 시각화를 수행하고 공개 노트북·보고서로 정리했습니다.

@@ -1,8 +1,0 @@
-- layout: left
-  title: Personal NAS and OCI Self-Hosting
-  sub_title: Personal infrastructure operations
-  caption: Winter 2022 – Present
-  description: |
-    * Self-hosted a Kavita library, Jellyfin media service and personal projects with Docker on a NAS and OCI Linux VM.
-    * Page turns in remote Kavita reading were delayed, so I set up image and PDF caching and next-page preloading. When preloading failed due to a certificate-name mismatch, I aligned TLS SNI and HTTP Host and checked response, cache and queue records.
-    * Tested XPEnology on Proxmox, then removed the Proxmox layer. XPEnology is now the main NAS, with services running in Docker.

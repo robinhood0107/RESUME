@@ -1,9 +1,0 @@
-name: 박종진
-title: 백엔드 · AI 응용 개발자
-about_title: About Me
-about_content: |
-  Spring Boot·PostgreSQL 백엔드와 Python 기반 AI 기능을 연결하는 프로젝트를 해왔습니다. <mark>AI Trading Coach</mark> 졸업과제에서 PM과 주문 판단 백엔드를 맡아 투자 원칙, 모델 신호, 모의주문 흐름을 연결했습니다.
-
-  기존 <mark>comic-translate</mark>를 유지보수하며 로컬 OCR·번역 모델 실행, OCR 요청 경로와 반복 처리 캐시를 개선했습니다. <mark>미국주식 모의투자 서비스</mark>에서는 Spring Boot로 주문·지갑·보유 종목의 상태 변경을 구현했습니다.
-
-  개인 NAS와 OCI에서 Kavita·Jellyfin과 개인 프로젝트를 셀프호스팅하고 있습니다.

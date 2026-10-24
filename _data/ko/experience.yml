@@ -1,8 +1,0 @@
-- layout: left
-  title: NAS·OCI 개인 셀프호스팅
-  sub_title: 개인 운영 경험
-  caption: 2022년 겨울 ~ 현재
-  description: |
-    * NAS와 OCI Linux VM에서 Docker 기반으로 Kavita 개인 도서관, Jellyfin 미디어 서비스, 개인 프로젝트 등을 셀프호스팅했습니다.
-    * Kavita 원격 열람에서 페이지 전환 대기가 생겨 이미지·PDF 캐시와 다음 페이지 선로딩을 구성했습니다. 선로딩이 인증서 이름 불일치로 실패하자 요청의 SNI·Host를 맞췄고, 응답·캐시·대기열 기록으로 정상 처리를 확인했습니다.
-    * Proxmox 위 XPEnology 구성을 시험한 뒤 Proxmox 계층을 제거했습니다. 현재는 XPEnology를 메인 NAS로 두고 Docker로 서비스를 운영합니다.

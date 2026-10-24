@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard",
+    "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    monospace;
+
+  --color-ink: #111111;
+  --color-muted: #565656;
+  --color-faint: #767676;
+  --color-rule: #e4e4e4;
+  --color-accent: #1d4ed8;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  overflow-wrap: break-word;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* 인쇄 화면 */
+
+@page {
+  size: A4;
+  margin: 14mm 16mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 10pt;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /*
+   * PDF에서도 클릭 가능한 링크임이 보이도록 색과 밑줄을 남긴다.
+   * 사이트 nav·footer와 페이지 내 이동 링크는 .no-print이라 인쇄본에 남는 a는
+   * 연락처·스토어·상세 링크뿐이다.
+   */
+  a[href] {
+    color: var(--color-accent) !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* 항목 제목과 본문이 서로 다른 페이지로 나뉘지 않게 한다. */
+  .print-keep {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-section {
+    break-inside: auto;
+  }
+
+  .print-break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  * {
+    box-shadow: none !important;
+  }
+
+  .print-tight {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  /* 단계도와 기술 태그의 배경은 인쇄에서도 유지한다. */
+  .print-keep-color {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* 이미지 한 장이 페이지를 통째로 먹지 않도록 상한을 둔다. */
+  .print-cover img {
+    max-height: 68mm;
+    object-fit: contain;
+  }
+
+  /* 아키텍처 다이어그램은 한눈에 읽혀야 해서 상한을 넉넉히 준다. */
+  .print-architecture img {
+    max-height: 92mm;
+    object-fit: contain;
+  }
+
+  .print-shot img {
+    max-height: 62mm;
+    object-fit: contain;
+  }
+
+  .print-shot-wide img {
+    max-height: 52mm;
+    object-fit: contain;
+  }
+
+  img {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

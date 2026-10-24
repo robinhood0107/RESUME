@@ -30,7 +30,7 @@ npm run build:all
 python3 scripts/check_export.py
 ```
 
-정적 배포 산출물은 `out/`입니다. GitHub Actions는 한·영 PDF와 사이트를 함께 빌드합니다. `main` push 또는 수동 실행 시 Pages에 배포하며, PR에서는 빌드만 검증합니다.
+정적 배포 산출물은 `out/`입니다. GitHub Actions는 한·영 PDF와 사이트를 함께 빌드합니다. `main`에 push하거나 `main`에서 수동 실행하면 Pages에 배포하며, PR에서는 빌드만 검증합니다.
 
 수정할 데이터와 화면은 [EDITING.md](EDITING.md)에 정리했습니다. 템플릿 출처는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 기록했습니다.
 

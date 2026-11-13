@@ -25,14 +25,6 @@ function ItemHead({ title, period }: { title: string; period: string }) {
   );
 }
 
-function HighlightResult({ text }: { text: string }) {
-  const sentence = "동시 저장에서 메모가 덮어쓰이지 않도록 프론트엔드와 백엔드의 조건부 저장 계약을 맞췄습니다. 2건과 10건 동시 저장을 각각 30회 재현한 실험에서 성공 응답 뒤 유실된 메모는 300/360건에서 0/360건으로 줄었습니다.";
-  const result = "300/360건에서 0/360건";
-  if (text !== sentence) return text;
-  const [before, after] = text.split(result);
-  return <>{before}<strong>{result}</strong>{after}</>;
-}
-
 function Bullets({ items }: { items: readonly string[] }) {
   return (
     <ul className="mt-3 space-y-2 print:mt-2.5">
@@ -41,7 +33,7 @@ function Bullets({ items }: { items: readonly string[] }) {
           key={item}
           className="relative pl-4 text-[14px] leading-[1.75] before:absolute before:left-0 before:text-faint before:content-['–'] print:text-[10pt]"
         >
-          <HighlightResult text={item} />
+          {item}
         </li>
       ))}
     </ul>
@@ -102,7 +94,7 @@ export default function ResumePage() {
               <dt className="text-[13px] font-semibold">{group.category}</dt>
               <dd className="text-[14px] leading-[1.7] text-faint print:text-[10pt]">
                 <span className="font-medium text-ink">{group.strong.join(", ")}</span>
-                {group.items.length > 0 && `, ${group.items.join(", ")}`}
+                {group.items.length > 0 && <span className="text-[12.5px] print:text-[9pt]">, {group.items.join(", ")}</span>}
               </dd>
             </div>
           ))}

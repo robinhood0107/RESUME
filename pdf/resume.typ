@@ -18,29 +18,17 @@
     align(right)[#text(size: 7pt, fill: muted)[#counter(page).display()]]
   },
 )
-#set text(font: font, size: 9pt)
+#set text(font: font, size: 9pt, weight: "regular")
+#show strong: it => text(weight: "regular", it.body)
 #set par(justify: false, leading: 0.48em)
 #set heading(numbering: none)
-
-#let result-text(value) = {
-  let sentence = if lang == "ko" {
-    "동시 저장에서 메모가 덮어쓰이지 않도록 프론트엔드와 백엔드의 조건부 저장 계약을 맞췄습니다. 2건과 10건 동시 저장을 각각 30회 재현한 실험에서 성공 응답 뒤 유실된 메모는 300/360건에서 0/360건으로 줄었습니다."
-  } else {
-    "Aligned the frontend and backend conditional-save contract for concurrent memo updates. In a reproduction with 2 and 10 concurrent saves, each repeated 30 times, memos missing after successful responses fell from 300/360 to 0/360."
-  }
-  let result = if lang == "ko" { "300/360건에서 0/360건" } else { "300/360 to 0/360" }
-  if value == sentence {
-    let parts = value.split(result)
-    [#parts.at(0)#strong(result)#parts.at(1)]
-  } else { value }
-}
 
 #let entry(item) = block(breakable: false)[
   #grid(
     columns: (28%, 1fr),
     gutter: 10pt,
     [
-      #text(weight: "bold", size: 9.4pt)[#item.title]
+      #text(size: 9.4pt)[#item.title]
       #if item.subtitle != "" [#linebreak() #text(size: 8pt, fill: muted)[#item.subtitle]]
       #if item.caption != "" [#linebreak() #text(size: 7.8pt, fill: muted)[#item.caption]]
       #if item.link != "" [#linebreak() #link(item.link)[#text(size: 7.8pt, fill: rgb("#2a6f9e"))[#item.link_text]]]
@@ -48,7 +36,7 @@
     ],
     [
       #for bullet in item.bullets [
-        #text(size: 8.7pt)[• #result-text(bullet)]
+        #text(size: 8.7pt)[• #bullet]
         #linebreak()
       ]
     ],
@@ -56,7 +44,7 @@
   #v(1.5pt)
 ]
 
-#text(size: 20pt, weight: "bold")[#resume.name]
+#text(size: 20pt)[#resume.name]
 #linebreak()
 #text(size: 10pt, fill: muted)[#resume.title]
 #v(4pt)
@@ -71,7 +59,7 @@
   #if section.entries.len() > 0 [
     #block(breakable: false)[
       #v(5pt)
-      #text(size: 12pt, weight: "bold")[#section.title]
+      #text(size: 12pt)[#section.title]
       #v(1pt)
       #line(length: 100%, stroke: 0.45pt + rule)
       #v(3pt)

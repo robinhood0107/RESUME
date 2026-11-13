@@ -92,5 +92,5 @@ export function caseStudySummary(study: CaseStudy) {
 }
 
 export function findCaseStudy(slug: string) {
-  return caseStudies.find((study) => study.slug === slug);
+  return caseStudies.find((study) => study.slug === (slug === "prompt-airlock-webslide" ? "prompt-airlock" : slug));
 }

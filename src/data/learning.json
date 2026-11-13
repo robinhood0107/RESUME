@@ -96,7 +96,7 @@
         "links": [
           {
             "label": "관련 구현: 발표 사이트",
-            "href": "/portfolio/prompt-airlock-webslide/"
+            "href": "/portfolio/prompt-airlock/#presentation-materials"
           }
         ]
       }
@@ -108,7 +108,7 @@
     "items": [
       {
         "title": "Agentic AI 과정 실습",
-        "description": "6주 구성의 노트북·강의 자료와 일정 Agent 실습을 통해 도구 호출, trace와 결과 JSON을 관찰하는 방식을 익혔습니다. 제공된 실습 자료와 제가 담당한 팀 프로젝트 구현은 구분합니다.",
+        "description": "6주 구성의 노트북·강의 자료와 일정 Agent 실습을 통해 도구 호출, trace와 결과 JSON을 관찰하는 방식을 익혔습니다.",
         "links": [
           {
             "label": "과정 팀 프로젝트: IRYA",

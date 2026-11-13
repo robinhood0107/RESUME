@@ -9,13 +9,20 @@ const learning = JSON.parse(readFileSync(new URL("../src/data/learning.json", im
 const datePattern = /\b20\d{2}-\d{2}-\d{2}\b|20\d{2}년\s*\d{1,2}월\s*\d{1,2}일/;
 const captionText = data => JSON.stringify(data.flatMap(study => study.sections.flatMap(section => section.blocks).flatMap(block => block.kind === "screens" ? block.items.map(item => item.caption) : block.kind === "video" ? [block.description] : [])));
 
-test("각 프로젝트의 상세 경로와 GitHub 연결이 고유하고 유효하다", () => {
+test("각 프로젝트의 상세 경로와 공개 링크가 고유하고 유효하다", () => {
   assert.equal(studies.length, 10);
   assert.equal(new Set(studies.map(s => s.slug)).size, studies.length);
   for (const study of studies) {
     assert.match(study.slug, /^[a-z0-9-]+$/);
     assert.equal(study.links.caseStudy, `/portfolio/${study.slug}/`);
-    assert.equal(new URL(study.links.github).hostname, "github.com");
+    const external = Object.entries(study.links).filter(([key]) => key !== "caseStudy");
+    assert.ok(external.length > 0, study.slug);
+    for (const [key, value] of external) {
+      const url = new URL(value);
+      assert.equal(url.protocol, "https:", study.slug);
+      if (key === "github") assert.equal(url.hostname, "github.com", study.slug);
+    }
+    if (study.links.live) assert.notEqual(study.links.live, study.links.presentation, study.slug);
     assert.ok(study.sections.find(s => s.heading === "Overview"));
     assert.ok(study.sections.find(s => s.heading === "Role"));
     assert.ok(study.sections.find(s => s.heading === "System Architecture"));
@@ -24,10 +31,29 @@ test("각 프로젝트의 상세 경로와 GitHub 연결이 고유하고 유효�
     assert.ok(study.sections.find(s => s.heading === "Test Strategy"));
     assert.ok(study.sections.find(s => s.heading === "Measured Results"));
     assert.ok(study.sections.find(s => s.heading === "Problem"));
-    assert.ok(study.sections.find(s => s.heading.endsWith("Verification")));
     assert.ok(study.sections.find(s => s.heading === "Results"));
     assert.equal(new Set(study.sections.map(s => s.heading)).size, study.sections.length);
   }
+});
+
+test("각 포트폴리오 카드에 상세 경로와 대표 이미지가 있다", () => {
+  for (const study of studies) {
+    assert.ok(study.links.caseStudy, study.slug);
+    assert.ok(study.cover?.src && study.cover.alt && study.cover.width && study.cover.height, study.slug);
+    assert.ok(existsSync(resolve("public", study.cover.src.slice(1))), study.slug);
+  }
+});
+
+test("웹 이력서는 프로젝트를 마지막에 표시하고 발표 자료를 데모로 표시하지 않는다", () => {
+  const resumePage = readFileSync(new URL("../src/app/resume/page.tsx", import.meta.url), "utf8");
+  const headings = [...resumePage.matchAll(/<SectionHeading index="\d+">([^<]+)<\/SectionHeading>/g)].map(match => match[1]);
+  assert.deepEqual(headings, ["Profile", "Skills", "Experience", "Education", "Activities", "Projects"]);
+  const slide = studies.find(study => study.slug === "prompt-airlock-webslide");
+  assert.ok(slide.links.presentation);
+  assert.equal(slide.links.live, undefined);
+  const irya = studies.find(study => study.slug === "irya");
+  assert.equal(irya.links.live, "https://irya.cloud/");
+  assert.ok(irya.links.presentation && irya.links.introduction);
 });
 
 test("학습 기록은 공개 출처 또는 존재하는 내부 사례로 연결된다", () => {

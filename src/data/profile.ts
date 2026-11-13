@@ -11,7 +11,7 @@ export const profile = {
   nameEn: resume.en.name,
   role: resume.ko.title,
   tagline: "백엔드와 AI 기능을 연결하고,\n실행 결과를 확인하며 개선합니다.",
-  summary: "Spring Boot·PostgreSQL 백엔드와 Python 기반 AI 기능을 연결하고, C++23·Rust로 개인정보 보호 Gateway를 개발하고 있습니다. AI가 구현을 도와도 사용한 기술과 변경 이유를 이해하고, 명세·테스트·리뷰로 제가 설명하고 수정할 수 있는 상태를 만들려고 합니다.",
+  summary: resume.ko.about,
   contacts: [
     { label: "Email", text: resume.ko.email, href: `mailto:${resume.ko.email}` },
     { label: "GitHub", text: "github.com/robinhood0107", href: GITHUB_URL },

@@ -11,7 +11,7 @@ import type {
 } from "@/data/caseStudies";
 
 /** 서비스 공식 대표 이미지. 원본 비율 그대로, crop·mockup 없이 크게 보여준다. */
-export function ProjectCover({ cover }: { cover: Screenshot }) {
+export function ProjectCover({ cover, compact = false }: { cover: Screenshot; compact?: boolean }) {
   return (
     <figure className="print-keep print-cover mt-8 print:mt-5">
       <Image
@@ -20,7 +20,7 @@ export function ProjectCover({ cover }: { cover: Screenshot }) {
         width={cover.width}
         height={cover.height}
         sizes="(max-width: 860px) 100vw, 860px"
-        className="h-auto max-h-[440px] w-full border border-rule object-contain"
+        className={compact ? "h-56 w-full border border-rule object-contain" : "h-auto max-h-[440px] w-full border border-rule object-contain"}
       />
       {cover.caption && (
         <figcaption className="mt-2 text-[12px] leading-[1.55] text-muted">
@@ -280,7 +280,7 @@ function BlockView({ block }: { block: Block }) {
 
     case "screens":
       return block.title ? (
-        <details className="group">
+        <details open className="group">
           <summary className="cursor-pointer font-semibold">{block.title}</summary>
           <div className="mt-4"><ScreenshotGrid layout={block.layout} items={block.items} /></div>
         </details>
@@ -292,12 +292,12 @@ function BlockView({ block }: { block: Block }) {
           <video controls playsInline preload="metadata" poster={assetPath(block.poster)} aria-label={block.title} className="h-auto w-full border border-rule">
             {block.sources.map((source) => <source key={source.src} src={assetPath(source.src)} type={source.type} />)}
             {block.captions && <track kind="captions" src={assetPath(block.captions.src)} srcLang={block.captions.srcLang} label={block.captions.label} default />}
-            {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download>원본 다운로드 ({source.type})</a>)}
+            {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download>영상 내려받기 ({source.type === "video/mp4" ? "MP4" : "WebM"})</a>)}
           </video>
           <figcaption className="mt-2 text-[13px] leading-[1.7] text-muted">
             <span className="block font-semibold">{block.title}</span>
             <span className="block">{block.description}</span>
-            {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download className="mr-4 underline underline-offset-4">원본 다운로드 ({source.type})</a>)}
+            {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download className="mr-4 underline underline-offset-4">영상 내려받기 ({source.type === "video/mp4" ? "MP4" : "WebM"})</a>)}
           </figcaption>
         </figure>
       );
@@ -340,9 +340,19 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
   const { overview, results } = caseStudySummary(study);
   const architecture = study.sections.find((section) => section.heading === "System Architecture");
   const architectureImage = architecture?.blocks.find((block) => block.kind === "screens");
+  const media = study.sections.flatMap((section) => section.blocks).filter((block) => (block.kind === "screens" || block.kind === "video") && block !== architectureImage);
   return (
     <article className="print-section border-t border-ink pt-8">
       <ProjectHeader study={study} as="h1" />
+
+      {study.cover && <ProjectCover cover={study.cover} />}
+
+      {/* 실제 데모 주소가 확인되면 해당 링크를 별도로 추가한다. */}
+      {study.links && (
+        <div className="mt-6">
+          <ProjectLinks links={{ ...study.links, caseStudy: undefined }} />
+        </div>
+      )}
 
       <div className="mt-8 space-y-8">
         <section>
@@ -355,25 +365,26 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
           <Metrics items={results} />
         </section>
         {architectureImage && <BlockView block={architectureImage} />}
+        {media.map((block, i) => <BlockView key={i} block={block} />)}
       </div>
 
-      {study.cover && <ProjectCover cover={study.cover} />}
-
-      {/* 상세 페이지에서는 이미 상세 안이므로 실제 서비스 링크만 노출한다. */}
-      {study.links && (
-        <div className="mt-6">
-          <ProjectLinks links={{ ...study.links, caseStudy: undefined }} />
-        </div>
-      )}
-
       <div className="mt-10 space-y-10 print:mt-6 print:space-y-6">
-        {study.sections.map((section) => (
+        {study.sections.map((section) => {
+          const hasVisibleContent = section.blocks.some((block) =>
+            !media.includes(block) &&
+            !(section.heading === "Overview" && block.kind === "text" && block.text === overview) &&
+            !(section.heading === "System Architecture" && block === architectureImage) &&
+            !(section.heading === "Results" && block.kind === "metrics" && block.items.length <= results.length)
+          );
+          if (!hasVisibleContent) return null;
+          return (
             <section key={section.heading} className="print-keep">
               <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">
                 {section.heading}
               </h2>
               <div className="space-y-4">
                 {section.blocks.map((block, i) => {
+                  if (media.includes(block)) return null;
                   if ((section.heading === "Overview" && block.kind === "text" && block.text === overview) ||
                       (section.heading === "System Architecture" && block === architectureImage)) return null;
                   if (section.heading === "Results" && block.kind === "metrics") {
@@ -384,7 +395,8 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
                 })}
               </div>
             </section>
-        ))}
+          );
+        })}
       </div>
     </article>
   );

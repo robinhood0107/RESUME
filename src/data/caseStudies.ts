@@ -44,6 +44,8 @@ export type ProjectLinks = {
   appStore?: string;
   playStore?: string;
   live?: string;
+  presentation?: string;
+  introduction?: string;
   github?: string;
   frontend?: string;
   ai?: string;

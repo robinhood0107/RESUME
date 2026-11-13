@@ -11,7 +11,7 @@ type Props = { params: Promise<{ slug: string }> };
 
 // 프로젝트를 추가할 때 caseStudies 데이터만 늘리면 route가 함께 생성된다.
 export function generateStaticParams() {
-  return caseStudies.map((study) => ({ slug: study.slug }));
+  return [...caseStudies.map((study) => ({ slug: study.slug })), { slug: "prompt-airlock-webslide" }];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -35,6 +35,10 @@ export default async function CaseStudyPage({ params }: Props) {
   const study = findCaseStudy(slug);
   if (!study) notFound();
 
+  if (slug === "prompt-airlock-webslide") {
+    return <p className="mx-auto max-w-[860px] px-5 py-12"><Link href="/portfolio/prompt-airlock/#presentation-materials" className="text-accent underline">PromptAirlock 진행보고와 발표 자료로 이동</Link></p>;
+  }
+
   return (
     <div className="mx-auto max-w-[860px] px-5 py-12 sm:px-8 sm:py-16 print:max-w-none print:px-0 print:py-0">
       <div className="no-print mb-8 flex items-center justify-between gap-4">
@@ -50,7 +54,7 @@ export default async function CaseStudyPage({ params }: Props) {
       <CaseStudy study={study} />
 
       <div className="mt-16 border-t border-rule pt-6">
-        {study.links && <ProjectLinks links={{ ...study.links, caseStudy: undefined }} />}
+        {study.links && <ProjectLinks links={{ ...study.links, caseStudy: undefined, ...(study.slug === "prompt-airlock" ? { presentation: undefined } : {}) }} />}
         <p className="no-print mt-3">
           <Link
             href="/portfolio/"

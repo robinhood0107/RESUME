@@ -8,7 +8,7 @@ export default function LearningSection() {
       <SectionHeading>학습 기록</SectionHeading>
       <p className="mb-6 max-w-2xl text-[15px] leading-[1.75] text-muted">
         사용한 기술을 이해하고 다룰 수 있는 범위를 넓히기 위해 남긴 기록입니다.
-        수업·강의·개인 연습과 구현 프로젝트를 구분하고, 공개할 수 있는 자료와 관련 사례를 연결했습니다.
+        수업과 강의, 개인 연습을 관련 구현 사례와 연결했습니다.
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         {learning.map((group, index) => (

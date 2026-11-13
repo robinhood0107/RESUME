@@ -79,7 +79,7 @@ function ScreenshotGrid({
             </a>
             <figcaption className="mt-2">
               <span className="block text-[12.5px] font-semibold">{shot.title}</span>
-              {shot.caption && (
+              {shot.caption && shot.caption !== shot.title && (
                 <span className="mt-0.5 block text-[12px] leading-[1.55] text-muted">
                   {shot.caption}
                 </span>
@@ -296,7 +296,7 @@ function BlockView({ block }: { block: Block }) {
           </video>
           <figcaption className="mt-2 text-[13px] leading-[1.7] text-muted">
             <span className="block font-semibold">{block.title}</span>
-            <span className="block">{block.description}</span>
+            {block.description !== block.title && <span className="block">{block.description}</span>}
             {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download className="mr-4 underline underline-offset-4">영상 내려받기 ({source.type === "video/mp4" ? "MP4" : "WebM"})</a>)}
           </figcaption>
         </figure>
@@ -349,7 +349,7 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
 
       {/* 실제 데모 주소가 확인되면 해당 링크를 별도로 추가한다. */}
       {study.links && (
-        <div className="mt-6">
+        <div id={study.slug === "prompt-airlock" ? "presentation-materials" : undefined} className="mt-6">
           <ProjectLinks links={{ ...study.links, caseStudy: undefined }} />
         </div>
       )}
@@ -365,7 +365,7 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
           <Metrics items={results} />
         </section>
         {architectureImage && <BlockView block={architectureImage} />}
-        {media.map((block, i) => <BlockView key={i} block={block} />)}
+        {media.map((block, i) => <BlockView key={i} block={study.slug === "document-translate" && block.kind === "screens" ? { ...block, items: block.items.filter((item) => item.src !== study.cover?.src) } : block} />)}
       </div>
 
       <div className="mt-10 space-y-10 print:mt-6 print:space-y-6">

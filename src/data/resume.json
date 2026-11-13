@@ -86,7 +86,7 @@
             "additional_links": [],
             "bullets": [
               "NAS와 OCI Linux VM에서 Docker 기반으로 Kavita 개인 도서관, Jellyfin 미디어 서비스, 개인 프로젝트 등을 셀프호스팅했습니다.",
-              "Kavita 원격 열람에서 페이지 전환 대기가 생겨 이미지, PDF 캐시와 다음 페이지 선로딩을 구성했습니다. 선로딩이 인증서 이름 불일치로 실패하자 요청의 SNI, Host를 맞췄고 응답, 캐시, 대기열 기록으로 정상 처리를 확인했습니다.",
+              "Kavita 원격 열람에서 페이지 전환 대기가 생겨 이미지, PDF 캐시와 다음 페이지 선로딩을 구성했습니다. 선로딩이 인증서 이름 불일치로 실패하자 요청의 SNI, Host를 맞췄습니다.",
               "Proxmox 위 XPEnology 구성을 시험한 뒤 Proxmox 계층을 제거했습니다. 현재는 XPEnology를 메인 NAS로 두고 Docker로 서비스를 운영합니다."
             ]
           }
@@ -122,7 +122,7 @@
             "additional_links": [],
             "bullets": [
               "화상면접의 준비와 진행, 검토 흐름을 연결하는 프론트엔드를 주로 맡고 다른 프론트엔드 담당자와 협의하며 교차 확인했습니다.",
-              "동시 저장에서 메모가 덮어쓰이지 않도록 프론트엔드와 백엔드의 조건부 저장 계약을 맞췄습니다. 2건과 10건 동시 저장을 각각 30회 재현한 실험에서 성공 응답 뒤 유실된 메모는 300/360건에서 0/360건으로 줄었습니다."
+              "동시 저장에서 메모가 덮어쓰이지 않도록 프론트엔드와 백엔드의 조건부 저장 계약을 맞췄습니다. PostgreSQL 17.11 저장소 계층에서 2건과 10건 동시 저장을 각각 30회 사후 재현한 실험에서 성공 응답 뒤 유실된 메모는 300/360건에서 0/360건으로 줄었습니다."
             ]
           },
           {
@@ -153,7 +153,7 @@
           {
             "title": "KB 안심보이스, 머니룰",
             "subtitle": "3인 대회 모의 프로토타입, TTS",
-            "caption": "2026.07 ~ 2026.08",
+            "caption": "",
             "link": "https://github.com/robinhood0107/kb-ansimvoice",
             "link_text": "공개 GitHub",
             "additional_links": [],
@@ -163,7 +163,7 @@
             ]
           },
           {
-            "title": "OliveME 퍼스널컬러 Android 앱",
+            "title": "OliveMe 퍼스널컬러 Android 앱",
             "subtitle": "2인 팀, Android 구조 / 데이터 / 연동",
             "caption": "2026.05 ~ 2026.06",
             "link": "https://github.com/personal-color-app/personal_color_app",
@@ -352,7 +352,7 @@
             "additional_links": [],
             "bullets": [
               "Self-hosted a Kavita library, Jellyfin media service and personal projects with Docker on a NAS and OCI Linux VM.",
-              "Page turns in remote Kavita reading were delayed, so I set up image and PDF caching and next-page preloading. When preloading failed due to a certificate-name mismatch, I aligned TLS SNI and HTTP Host and checked response, cache and queue records.",
+              "Page turns in remote Kavita reading were delayed, so I set up image and PDF caching and next-page preloading. When preloading failed due to a certificate-name mismatch, I aligned TLS SNI and HTTP Host.",
               "Tested XPEnology on Proxmox, then removed the Proxmox layer. XPEnology is now the main NAS, with services running in Docker."
             ]
           }
@@ -388,7 +388,7 @@
             "additional_links": [],
             "bullets": [
               "As a primary frontend contributor, connected interview preparation, sessions and review while coordinating and cross-checking with another frontend contributor.",
-              "Aligned the frontend and backend conditional-save contract for concurrent memo updates. In a reproduction with 2 and 10 concurrent saves, each repeated 30 times, memos missing after successful responses fell from 300/360 to 0/360."
+              "Aligned the frontend and backend conditional-save contract for concurrent memo updates. In a post hoc PostgreSQL 17.11 store-layer reproduction with 2 and 10 concurrent saves, each repeated 30 times, memos missing after successful responses fell from 300/360 to 0/360."
             ]
           },
           {
@@ -419,7 +419,7 @@
           {
             "title": "KB AnsimVoice and Money Rules",
             "subtitle": "Three-person contest prototype, TTS",
-            "caption": "Jul 2026 – Aug 2026",
+            "caption": "",
             "link": "https://github.com/robinhood0107/kb-ansimvoice",
             "link_text": "Public GitHub",
             "additional_links": [],
@@ -429,7 +429,7 @@
             ]
           },
           {
-            "title": "OliveME Personal Color Android App",
+            "title": "OliveMe Personal Color Android App",
             "subtitle": "Two-person team, Android architecture / data / integration",
             "caption": "May 2026 – Jun 2026",
             "link": "https://github.com/personal-color-app/personal_color_app",

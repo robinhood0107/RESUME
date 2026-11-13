@@ -94,7 +94,7 @@ export default function ResumePage() {
               <dt className="text-[13px] font-semibold">{group.category}</dt>
               <dd className="text-[14px] leading-[1.7] text-faint print:text-[10pt]">
                 <span className="font-medium text-ink">{group.strong.join(", ")}</span>
-                {group.items.length > 0 && <span className="text-[12.5px] print:text-[9pt]">, {group.items.join(", ")}</span>}
+                {group.items.length > 0 && <span className="text-[12.5px] print:text-[9pt]">{group.strong.length > 0 && ", "}{group.items.join(", ")}</span>}
               </dd>
             </div>
           ))}

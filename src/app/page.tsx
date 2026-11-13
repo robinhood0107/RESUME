@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SectionHeading from "@/components/SectionHeading";
+import LearningSection from "@/components/LearningSection";
 import { GITHUB_URL, profile } from "@/data/profile";
 
 export default function Home() {
@@ -75,6 +76,8 @@ export default function Home() {
         </dl>
       </section>
 
+      <LearningSection />
+
       <section className="mt-16 max-w-2xl">
         <SectionHeading>How I Work with AI</SectionHeading>
         <p className="text-[17px] leading-[1.7]">{profile.ai.stance}</p>
@@ -88,6 +91,12 @@ export default function Home() {
           className="mt-5 inline-block text-[14px] font-medium underline underline-offset-4 hover:opacity-70"
         >
           {profile.ai.caseStudyLabel}
+        </Link>
+        <Link
+          href={profile.ai.practiceCaseStudy}
+          className="mt-3 block text-[14px] font-medium underline underline-offset-4 hover:opacity-70"
+        >
+          {profile.ai.practiceCaseStudyLabel}
         </Link>
       </section>
     </div>

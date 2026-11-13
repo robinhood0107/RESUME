@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+<title id="title">PromptAirlock, 진행보고, 발표 사이트 구조도</title>
+<desc id="desc">발표 사이트의 주요 구성과 관련 작업을 나타낸 구조도입니다. 연결선은 처리 순서를 뜻하지 않습니다.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#64748b" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="820" fill="white"/>
+<text x="35" y="43" font-size="28" font-family="sans-serif" font-weight="700" fill="#111827">PromptAirlock, 진행보고, 발표 사이트</text>
+<path d="M600 230 V292" fill="none" stroke="#64748b" stroke-width="2"/>
+<path d="M600 470 V510 H302 V552" fill="none" stroke="#64748b" stroke-width="2"/>
+<path d="M600 470 V510 H897 V552" fill="none" stroke="#64748b" stroke-width="2"/>
+<rect x="300" y="85" width="600" height="145" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="322" y="125" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">정적 사이트 진입점</text>
+<text x="322" y="165" font-size="20" fill="#334155" font-family="sans-serif">진행보고 목록, 월별 보고, 중간 발표</text>
+<text x="322" y="199" font-size="20" fill="#334155" font-family="sans-serif">HTML / CSS / JavaScript, 별도 제품 저장소</text>
+<rect x="300" y="300" width="600" height="170" rx="8" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="322" y="340" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">슬라이드 상태와 입력 처리</text>
+<text x="322" y="380" font-size="20" fill="#334155" font-family="sans-serif">현재 장, 버튼, 키보드, 휠, 스와이프</text>
+<text x="322" y="414" font-size="20" fill="#334155" font-family="sans-serif">영상 조작 키와 슬라이드 이동을 분리</text>
+<rect x="30" y="560" width="545" height="180" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="52" y="600" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">Python, Manim → 영상 자산</text>
+<text x="52" y="640" font-size="20" fill="#334155" font-family="sans-serif">실행 기록 JSON을 읽어 애니메이션 생성</text>
+<text x="52" y="674" font-size="20" fill="#334155" font-family="sans-serif">MP4 + WebM, poster, 발표 대본</text>
+<rect x="625" y="560" width="545" height="180" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="647" y="600" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">게시 전, 후 검사</text>
+<text x="647" y="640" font-size="20" fill="#334155" font-family="sans-serif">git 추적 파일과 HTML 참조 대조</text>
+<text x="647" y="674" font-size="20" fill="#334155" font-family="sans-serif">브라우저 표시, 실제 재생, 동작 줄이기 검사</text>
+<text x="35" y="790" font-family="sans-serif" font-size="17" fill="#64748b">README, 현재 코드 기준 요약, 배포, 외부 서비스 실행 여부는 본문 검증 범위에 별도 표시</text>
+</svg>

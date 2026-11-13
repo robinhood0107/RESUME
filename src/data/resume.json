@@ -3,7 +3,7 @@
     "language": "ko",
     "name": "박종진",
     "title": "백엔드 · AI 응용 개발자",
-    "about": "Spring Boot·PostgreSQL 백엔드와 Python 기반 AI 기능을 연결하는 프로젝트를 해왔습니다. AI Trading Coach 졸업과제에서 PM과 주문 판단 백엔드를 맡아 투자 원칙, 모델 신호, 모의주문 흐름을 연결했습니다.\n\n기존 comic-translate를 유지보수하며 로컬 OCR·번역 모델 실행, OCR 요청 경로와 반복 처리 캐시를 개선했습니다. 미국주식 모의투자 서비스에서는 Spring Boot로 주문·지갑·보유 종목의 상태 변경을 구현했습니다.\n\n개인 NAS와 OCI에서 Kavita·Jellyfin과 개인 프로젝트를 셀프호스팅하고 있습니다.",
+    "about": "사용자의 요청이 안전하게 처리되고 결과를 다시 확인할 수 있도록 백엔드와 데이터 흐름을 설계합니다. AI Trading Coach 졸업과제에서 PM과 주문 판단 백엔드를 맡아 투자 원칙, 모델 신호와 모의주문을 연결했습니다.\n\n기존 comic-translate를 유지보수하며 OCR 요청 경로와 반복 처리 방식을 개선했습니다. 미국주식 모의투자 서비스에서는 주문에 따른 지갑과 보유 종목의 변경을 한 트랜잭션으로 묶었습니다. 개인 NAS와 OCI에서 서비스를 운영하고 있습니다.",
     "email": "pjj4678@gmail.com",
     "github": "https://github.com/robinhood0107",
     "sections": [
@@ -19,9 +19,9 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "RAG: PostgreSQL·pgvector 자료 분리, 검색 권한 및 인용·숫자 재검증",
-              "로컬 OCR·LLM: Docker·llama.cpp에서 PaddleOCR-VL·HunyuanOCR·Gemma 실행 경로 연동, 단계별 캐시",
-              "팀 AI 서버: vLLM·Ollama·GPT-SoVITS의 Docker·GPU 설정 및 전환 스크립트 작성"
+              "RAG: PostgreSQL, pgvector 자료 분리, 검색 권한 및 인용, 숫자 재검증",
+              "로컬 OCR, LLM: Docker, llama.cpp에서 PaddleOCR-VL, HunyuanOCR, Gemma 실행 경로 연동, 단계별 캐시",
+              "팀 AI 서버: vLLM, Ollama, GPT-SoVITS의 Docker, GPU 설정 및 전환 스크립트 작성"
             ]
           },
           {
@@ -32,8 +32,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "주력: Java·Kotlin, Spring Boot, Python, FastAPI, PostgreSQL",
-              "REST API, SQL, 트랜잭션·잠금·DB 제약조건, 오류·상태 전이 처리",
+              "주력: Java, Kotlin, Spring Boot, Python, FastAPI, PostgreSQL",
+              "REST API, SQL, 트랜잭션, 잠금, DB 제약조건, 오류, 상태 전이 처리",
               "사용 경험: MySQL, Redis, WebSocket/STOMP"
             ]
           },
@@ -45,8 +45,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Docker, Linux, GitHub Actions, Nginx, NAS·OCI 개인 서비스 운영",
-              "Windows 설치·실행 자동화, pytest·JUnit과 재현 가능한 성능 측정"
+              "Docker, Linux, GitHub Actions, Nginx, NAS, OCI 개인 서비스 운영",
+              "Windows 설치, 실행 자동화, pytest, JUnit과 재현 가능한 성능 측정"
             ]
           },
           {
@@ -57,9 +57,33 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "모던 C++: 대학 수업과 코딩테스트 학습에 주로 사용",
-              "Kotlin Android·Jetpack Compose·Room 앱 프로젝트 경험",
-              "Git·GitHub PR, 기술 문서와 프로젝트 간 API 계약 조율"
+              "C++23, Rust: PromptAirlock의 단계 타입, RAII, Vault 프로세스, IPC 설계 및 시험",
+              "Kotlin Android, Jetpack Compose, Room 앱 프로젝트 경험",
+              "Git, GitHub PR, 기술 문서와 프로젝트 간 API 계약 조율"
+            ]
+          },
+          {
+            "title": "개발, 검증 방식",
+            "subtitle": "",
+            "caption": "",
+            "link": "",
+            "link_text": "GitHub",
+            "additional_links": [],
+            "bullets": [
+              "명세와 작업 범위, 완료 기준을 정하고 변경 내용과 결과를 직접 확인합니다. 커밋과 PR 진행은 제가 승인합니다.",
+              "정적 분석과 단위, 통합, 회귀 시험을 나누고 설계 기록과 보고서로 검토와 유지보수를 돕습니다."
+            ]
+          },
+          {
+            "title": "어학",
+            "subtitle": "",
+            "caption": "",
+            "link": "",
+            "link_text": "GitHub",
+            "additional_links": [],
+            "bullets": [
+              "일본어: JLPT N2 취득. 회화와 일본어 자격시험 공부를 꾸준히 이어가고 있습니다.",
+              "영어: OPIc IM2 취득."
             ]
           }
         ]
@@ -69,7 +93,7 @@
         "title": "Experience",
         "entries": [
           {
-            "title": "NAS·OCI 개인 셀프호스팅",
+            "title": "NAS, OCI 개인 셀프호스팅",
             "subtitle": "개인 운영 경험",
             "caption": "2022년 겨울 ~ 현재",
             "link": "",
@@ -77,7 +101,7 @@
             "additional_links": [],
             "bullets": [
               "NAS와 OCI Linux VM에서 Docker 기반으로 Kavita 개인 도서관, Jellyfin 미디어 서비스, 개인 프로젝트 등을 셀프호스팅했습니다.",
-              "Kavita 원격 열람에서 페이지 전환 대기가 생겨 이미지·PDF 캐시와 다음 페이지 선로딩을 구성했습니다. 선로딩이 인증서 이름 불일치로 실패하자 요청의 SNI·Host를 맞췄고, 응답·캐시·대기열 기록으로 정상 처리를 확인했습니다.",
+              "Kavita 원격 열람에서 페이지 전환 대기가 생겨 이미지, PDF 캐시와 다음 페이지 선로딩을 구성했습니다. 선로딩이 인증서 이름 불일치로 실패하자 요청의 SNI, Host를 맞췄고 응답, 캐시, 대기열 기록으로 정상 처리를 확인했습니다.",
               "Proxmox 위 XPEnology 구성을 시험한 뒤 Proxmox 계층을 제거했습니다. 현재는 XPEnology를 메인 NAS로 두고 Docker로 서비스를 운영합니다."
             ]
           }
@@ -89,54 +113,51 @@
         "entries": [
           {
             "title": "투자 원칙 검증형 AI Trading Coach",
-            "subtitle": "3인 졸업과제 · PM / Decision Platform",
+            "subtitle": "3인 졸업과제, PM / Decision Platform",
             "caption": "2026.05 ~ 2026.10",
             "link": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach",
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "초기에는 투자 규칙과 모델이 모두 매수를 내야 후보가 생겨 평가 세션의 절반 이상이 비었습니다. 규칙이 후보를 만들고 모델의 매도 신호가 제외하도록 바꿨습니다.",
-              "모의주문 게이트웨이에서 오류가 나도 주문을 자동 재전송하지 않도록 했습니다. 주문 기록을 저장하지 못하면 전송 전에 차단하는 흐름도 테스트로 확인했습니다.",
-              "주문 전에 사용자 원칙과 시스템 규칙을 검사하고, 모의주문 시나리오에서 주문·체결·잔고 반영과 중복 제출 방지를 검증했습니다.",
-              "금융 자료의 원본·개정본·검색 조각·임베딩을 PostgreSQL에 나누어 저장했습니다. 공개·개인 자료의 검색 권한과 인용·숫자 확인을 구현했습니다.",
-              "LSTM 학습·Return Engine·대시보드 UX는 팀원이 맡았습니다."
+              "PM과 주문 판단 백엔드를 맡아 투자 원칙, 모델 신호와 모의주문을 연결했습니다. 주문 오류를 자동 재전송하지 않고 기록 준비에 실패하면 전송을 막도록 시험했습니다.",
+              "규칙이 제안한 후보에서 모델의 SELL 신호를 제외하는 방식을 비교했습니다. 동일 31종목과 5,362개 오프라인 세션에서 후보 없는 비율은 51.8%에서 1.4%로 줄었지만 비용 차감 일간 초과수익은 +0.0214%p에서 -0.0406%p로 낮아졌습니다.",
+              "LSTM 학습과 Return Engine, 대시보드 UX는 팀원이 담당했습니다. 후보 공백은 투자 수익과 구분해 해석했습니다."
             ]
           },
           {
-            "title": "문서·이미지 번역 AI 파이프라인",
+            "title": "문서, 이미지 번역 AI 파이프라인",
             "subtitle": "개인 오픈소스 유지보수 포크",
             "caption": "2026.04 ~ 현재",
             "link": "https://github.com/robinhood0107/document-translate-myfix",
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "기존 comic-translate에 로컬 HunyuanOCR·PaddleOCR-VL OCR과 Gemma 번역 모델의 실행 경로를 추가했습니다.",
-              "글자 영역을 중계 서버를 거쳐 OCR 모델로 보내던 방식을 직접 요청으로 바꿨습니다. 동일 일본어 6페이지·73개 영역의 OCR 처리 시간은 60.2초에서 8.3초로 줄었고, 최종 두 차례 비교에서 읽어낸 텍스트는 같았습니다.",
-              "입력·모델·설정이 같을 때 처리 단계를 재사용하는 캐시를 추가했습니다. 동일 2페이지의 첫 처리와 동일 입력 재실행 총시간은 캐시 미사용 279.9초, 사용 시 156.0초였습니다."
+              "기존 comic-translate에 로컬 OCR과 번역 모델 실행 경로를 연동했습니다. 같은 입력과 모델, 설정에서는 처리 단계를 재사용하도록 캐시를 추가했습니다.",
+              "OCR 중계 경로를 직접 요청으로 바꾸고 출력이 같은지 확인했습니다. 일본어 6페이지와 73개 블록에서 경로별 2회 중앙값 기준 runner 구간은 60.2초에서 8.3초로 줄었고 출력 블록은 같았습니다."
             ]
           },
           {
             "title": "미국주식 모의투자 웹 서비스",
-            "subtitle": "2인 팀 · 백엔드 / 배포",
+            "subtitle": "2인 팀, 백엔드 / 배포",
             "caption": "2026.01",
             "link": "https://github.com/madcamp02-web-project/madcamp02-Backend",
             "link_text": "Backend GitHub",
             "additional_links": [],
             "bullets": [
-              "Spring Boot로 주문·지갑·보유 종목·거래 이력을 구현했습니다. 시세 조회는 DB 트랜잭션 밖에서 처리하고, 잔고와 보유 종목의 변경은 잠금과 트랜잭션으로 묶었습니다.",
-              "Redis로 시세를 캐시하고 WebSocket으로 전달했습니다. FastAPI AI 서버와 배포 환경을 연동했으며 화면·디자인은 팀원이 담당했습니다."
+              "주문에 따라 지갑과 보유 종목, 거래 이력이 함께 바뀌도록 잠금과 한 트랜잭션으로 묶었습니다. 2인 팀에서 Spring Boot 백엔드와 배포를 맡았습니다.",
+              "Redis 시세 캐시와 WebSocket 전달, FastAPI 서버 연동을 구성하고 실행 결과를 확인했습니다. 화면과 디자인은 팀원이 맡았습니다."
             ]
           },
           {
-            "title": "KB 안심보이스·머니룰",
-            "subtitle": "3인 대회 모의 프로토타입 · Agent / TTS",
+            "title": "KB 안심보이스, 머니룰",
+            "subtitle": "3인 대회 모의 프로토타입, Agent / TTS",
             "caption": "2026.07 ~ 2026.08",
             "link": "https://github.com/robinhood0107/kb-ansimvoice",
             "link_text": "공개 GitHub",
             "additional_links": [],
             "bullets": [
-              "AI가 해석한 송금 초안의 금액·수취인·계좌를 사용자 발화와 서버 데이터에 다시 대조했습니다. 값이 다르면 송금 입력으로 넘기지 않습니다.",
-              "송금 판단과 일회용 승인은 규칙 코드가 처리합니다. 본인은 제한형 Agent와 입력 재대조, TTS·WebSocket·Docker 연동을 맡았습니다."
+              "모의 송금에서 잘못 해석된 금액과 수취인, 계좌가 그대로 전달되지 않도록 원문 및 서버 데이터와 대조하고 규칙 판정과 일회용 승인을 연결했습니다.",
+              "3인 팀에서 제한형 Agent와 TTS, WebSocket 연동을 맡아 오프라인 Golden Set과 규칙 시험으로 확인했습니다."
             ]
           },
           {
@@ -147,20 +168,20 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Java·Spring Boot·PostgreSQL로 공급사·발주·납품·재고와 탄소배출 데이터를 관리하는 수업 과제를 구현했습니다.",
-              "발주·납품·재고 변경이 서로 어긋나지 않도록 한 트랜잭션으로 묶고 DB 제약조건과 오류 처리를 추가했습니다."
+              "공급망과 탄소배출을 관리하는 데이터베이스 수업 프로젝트를 직접 만들었습니다. 콘솔과 웹 앱이 같은 데이터를 사용하도록 PostgreSQL을 연결했습니다.",
+              "발주부터 납품과 재고 반영까지 한 트랜잭션으로 묶고 DB 제약조건과 UPSERT를 적용했습니다."
             ]
           },
           {
             "title": "OliveME 퍼스널컬러 Android 앱",
-            "subtitle": "2인 팀 · Android 구조 / 데이터 / 연동",
+            "subtitle": "2인 팀, Android 구조 / 데이터 / 연동",
             "caption": "2026.05 ~ 2026.06",
             "link": "https://github.com/personal-color-app/personal_color_app",
             "link_text": "Team GitHub",
             "additional_links": [],
             "bullets": [
-              "Kotlin·Jetpack Compose·Room으로 Android 화면과 저장 흐름을 구성하고 AI·지도 API를 연동했습니다.",
-              "외부 API나 백엔드가 실패해도 저장된 진단 이력과 로컬 안내를 볼 수 있게 했습니다. 화면 디자인은 팀원과 나누어 맡았습니다."
+              "퍼스널컬러 앱의 Android 화면과 저장 흐름을 구성하고 AI 및 지도 API를 연동했습니다. UI는 팀원과 나누어 맡았습니다.",
+              "API가 실패해도 로컬 이력과 가이드를 볼 수 있도록 처리했습니다."
             ]
           },
           {
@@ -171,7 +192,32 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Verilog 상태 기계, 클록 분주, 송신·수신 모듈을 FPGA 보드의 버튼·LED·7-segment·버저에 연결했습니다."
+              "FPGA에서 모스부호를 송수신하도록 RTL을 작성하고 LED, 7-segment, LCD와 버저를 연결했습니다.",
+              "시뮬레이션에서 A–Z 수신 해독과 송신 문자 선택, 순환, 저장 및 A 파형을 확인했습니다."
+            ]
+          },
+          {
+            "title": "PromptAirlock",
+            "subtitle": "개인 프로젝트, C++23 Gateway / Rust Vault",
+            "caption": "2026.10 ~ 현재",
+            "link": "https://github.com/robinhood0107/PromptAirlock",
+            "link_text": "GitHub",
+            "additional_links": [],
+            "bullets": [
+              "외부 AI 요청에 담긴 민감정보를 검사하고 가명화한 뒤 응답을 복원하는 경계를 설계했습니다. 원문 보관은 별도 Vault 프로세스로 분리했습니다.",
+              "합성 정상 문서 2,000개에서 계좌 오차단은 64.4%에서 3.8%로 낮아졌습니다. 문맥 없는 계좌를 놓칠 수 있고 처리 시간은 늘어난 조건입니다."
+            ]
+          },
+          {
+            "title": "PromptAirlock 진행보고, 발표 사이트",
+            "subtitle": "같은 제품의 공개 설명 자료, 정적 웹, 영상, 검사",
+            "caption": "2026.10 ~ 현재",
+            "link": "https://github.com/robinhood0107/prompt-airlock-webslide",
+            "link_text": "GitHub",
+            "additional_links": [],
+            "bullets": [
+              "PromptAirlock의 진행 상황을 설명하는 발표와 보고 자료를 정적 웹으로 구성하고 영상과 대본, 실행 기록을 함께 관리했습니다.",
+              "일반 및 동작 줄이기 설정에서 영상 재생과 키보드 조작을 확인하고 게시 파일 누락을 별도로 검사했습니다."
             ]
           }
         ]
@@ -202,13 +248,13 @@
           },
           {
             "title": "카카오테크캠퍼스 Agentic AI",
-            "subtitle": "Agentic AI · 프론트엔드 담당 · 참여 중",
+            "subtitle": "Agentic AI, 프론트엔드 담당, 참여 중",
             "caption": "2026.05 ~ 2026.11.20 예정",
             "link": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
             "link_text": "Team GitHub",
             "additional_links": [],
             "bullets": [
-              "과정 학습과 과제를 진행하며, AI 화상면접 지원 서비스 IRYA의 프론트엔드를 담당하고 있습니다."
+              "과정 학습, 과제를 진행하며 IRYA의 프론트엔드를 담당합니다. 업로드, 로그인 복귀, 검토, 전사 프레임 등 프론트엔드 시험 17개를 직접 실행해 통과했습니다."
             ]
           }
         ]
@@ -234,7 +280,7 @@
     "language": "en",
     "name": "Jongjin Park",
     "title": "Backend Engineer · AI Applications",
-    "about": "I have worked on Spring Boot and PostgreSQL backends and Python-based AI integrations. In the AI Trading Coach capstone, I was PM and worked on the order-decision backend, connecting user rules, model signals and mock orders.\n\nI maintain a fork of comic-translate, where I worked on local OCR and translation runtimes, the OCR request path and caching for repeated work. In a stock trading simulation, I built Spring Boot flows for orders, wallets and holdings.\n\nI self-host Kavita, Jellyfin and personal projects on a NAS and OCI.",
+    "about": "I design backend and data flows so requests can be handled safely and results can be checked. As PM and decision-platform contributor on AI Trading Coach, I connected investment rules, model signals and simulated orders.\n\nI maintain a comic-translate fork, improving its OCR request path and repeated-processing workflow. For a U.S. stock trading simulation, I grouped wallet and holding updates into one transaction. I also self-host services on a personal NAS and OCI.",
     "email": "pjj4678@gmail.com",
     "github": "https://github.com/robinhood0107",
     "sections": [
@@ -288,9 +334,32 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Modern C++: used mainly in university coursework and coding test practice",
+              "C++23/Rust: PromptAirlock stage types, RAII, a separate vault process, IPC and tests",
               "Kotlin Android, Jetpack Compose and Room project experience",
               "Git, GitHub pull requests, technical documentation and cross-project API contracts"
+            ]
+          },
+          {
+            "title": "Development and Verification",
+            "subtitle": "",
+            "caption": "",
+            "link": "",
+            "link_text": "GitHub",
+            "additional_links": [],
+            "bullets": [
+              "Set specifications, task boundaries and completion criteria, and directly check changes and results. I approve commits and PRs.",
+              "Use static analysis and unit, integration and regression tests, with design records and reports to support review and maintenance."
+            ]
+          },
+          {
+            "title": "Languages",
+            "subtitle": "",
+            "caption": "",
+            "link": "",
+            "link_text": "GitHub",
+            "additional_links": [],
+            "bullets": [
+              "Japanese: JLPT N2, ongoing conversation and exam study. English: OPIc IM2."
             ]
           }
         ]
@@ -326,11 +395,9 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Requiring both the rules and model to say BUY left over half of offline sessions without a candidate. I changed the flow to rule-proposed candidates with a model SELL veto.",
-              "Prevented automatic order resubmission on mock-order gateway errors. Tests also verified that an order is blocked before transmission when its tracking record cannot be prepared.",
-              "Mock-order tests covered submission, fills, balance updates and duplicate prevention after user and safety checks.",
-              "Separated financial sources, revisions, chunks and embeddings in PostgreSQL, with public/private retrieval and citation checks.",
-              "Teammates owned LSTM training, the Return Engine and dashboard UX."
+              "As PM and decision-platform contributor, connected investment rules, model signals and simulated orders. Tested safeguards against automatic resubmission and sending without a prepared record.",
+              "Compared rule-proposed candidates with a model SELL veto. Across the same 31 stocks and 5,362 offline sessions, the share with no candidate fell from 51.8% to 1.4%, while daily excess return after costs fell from +0.0214%p to -0.0406%p.",
+              "Teammates owned LSTM training, the Return Engine and dashboard UX. Candidate availability is distinct from investment return."
             ]
           },
           {
@@ -341,9 +408,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Added local HunyuanOCR, PaddleOCR-VL and Gemma paths to comic-translate.",
-              "Direct model requests cut OCR wall time from 60.2 to 8.3 seconds on the same six Japanese pages and 73 text regions; the final normalized OCR results matched.",
-              "Stage caching reuses matching input, model and settings. A two-page first run plus identical rerun took 279.9 seconds without caching and 156.0 seconds with it."
+              "Connected local OCR and translation model runtimes to the existing comic-translate fork. Added stage caching for matching inputs, models and settings.",
+              "Replaced the OCR relay with direct requests and checked output equality. On six Japanese pages and 73 blocks, the median runner time over two runs per path fell from 60.2 to 8.3 seconds, with matching output blocks."
             ]
           },
           {
@@ -354,8 +420,8 @@
             "link_text": "Backend GitHub",
             "additional_links": [],
             "bullets": [
-              "Built Spring Boot flows for orders, wallets, holdings and trade history. Price requests run outside DB transactions; balance and holding changes use locking and transactions.",
-              "Cached prices with Redis and delivered them through WebSocket. I integrated a FastAPI AI server and deployment setup; a teammate owned the interface and design."
+              "Grouped wallet, holding and trade-log updates under locks and one transaction. Owned the Spring Boot backend and deployment in a two-person team.",
+              "Connected Redis price caching, WebSocket delivery and a FastAPI server, and checked the execution results. A teammate owned the interface and design."
             ]
           },
           {
@@ -366,8 +432,8 @@
             "link_text": "Public GitHub",
             "additional_links": [],
             "bullets": [
-              "Rechecked the amount, recipient and account in an AI-drafted transfer against the user's utterance and server data. Mismatches are not passed to the transfer flow.",
-              "Rule-based code handles transfer decisions and one-time approval. I worked on the constrained agent, input checks and TTS, WebSocket and Docker integration."
+              "Checked interpreted amounts, recipients and accounts against source input and server data before connecting rule decisions and one-time approval to mock transfers.",
+              "In a three-person team, owned the constrained agent, TTS and WebSocket integration and checked them with offline golden sets and rule tests."
             ]
           },
           {
@@ -378,8 +444,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Built a Java, Spring Boot and PostgreSQL course project for supplier, order, delivery, inventory and carbon data.",
-              "Kept order, delivery and inventory changes in one transaction, with database constraints and error handling to prevent inconsistent updates."
+              "Built a database course project for supply-chain and carbon-emission management, connecting console and web apps to the same PostgreSQL data.",
+              "Grouped order, delivery and inventory updates in one transaction and applied database constraints and UPSERT."
             ]
           },
           {
@@ -390,8 +456,8 @@
             "link_text": "Team GitHub",
             "additional_links": [],
             "bullets": [
-              "Built Android screens and storage flows with Kotlin, Jetpack Compose and Room, and connected AI and map APIs.",
-              "Kept saved diagnoses and local guidance available when an external API or backend fails. A teammate shared the screen design work."
+              "Built Android screens and storage flows for a personal-color app and integrated AI and map APIs. Shared UI work with a teammate.",
+              "Kept local history and guides available when an API fails."
             ]
           },
           {
@@ -402,7 +468,32 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Connected Verilog state machines, clock division and transmit/receive modules to buttons, LEDs, seven-segment displays and a buzzer on an FPGA board."
+              "Built RTL for FPGA Morse-code transmission and reception and connected LED, seven-segment, LCD and buzzer outputs.",
+              "Simulation checked A–Z decoding, transmit selection and wraparound, storage and the A waveform."
+            ]
+          },
+          {
+            "title": "PromptAirlock",
+            "subtitle": "Personal project · C++23 gateway / Rust vault",
+            "caption": "Oct 2026 – Present",
+            "link": "https://github.com/robinhood0107/PromptAirlock",
+            "link_text": "GitHub",
+            "additional_links": [],
+            "bullets": [
+              "Designed boundaries for inspecting and pseudonymizing sensitive data in external AI requests and restoring responses; separated original data into a vault process.",
+              "On 2,000 synthetic benign documents, the account false-block rate fell from 64.4% to 3.8%. Accounts without context may be missed and processing time increased."
+            ]
+          },
+          {
+            "title": "PromptAirlock Progress Reports and Slides",
+            "subtitle": "Public materials for the same product · Static web and media",
+            "caption": "Oct 2026 – Present",
+            "link": "https://github.com/robinhood0107/prompt-airlock-webslide",
+            "link_text": "GitHub",
+            "additional_links": [],
+            "bullets": [
+              "Built a static site for PromptAirlock progress presentations and reports, maintaining videos, scripts and execution records together.",
+              "Checked video playback and keyboard operation under normal and reduced-motion settings, and separately checked for missing published files."
             ]
           }
         ]
@@ -439,7 +530,7 @@
             "link_text": "Team GitHub",
             "additional_links": [],
             "bullets": [
-              "Participating in coursework and assignments, with responsibility for the frontend of IRYA, an AI-assisted video interview service."
+              "Coursework and IRYA frontend development; directly ran and passed 17 frontend tests for uploads, login return, review state and transcript frames."
             ]
           }
         ]

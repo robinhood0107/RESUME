@@ -84,7 +84,7 @@ export default function ResumePage() {
         <p className="text-[15px] leading-[1.75] print:text-[10.5pt]">{profile.summary}</p>
       </section>
       <section className="print-section mt-10 print:mt-7">
-        <SectionHeading index="02">Selected Projects</SectionHeading>
+        <SectionHeading index="02">Projects</SectionHeading>
         <div className="space-y-9 print:space-y-6">
           {resumeProjects.map((project) => (
             <article key={project.name} className="print-keep">
@@ -123,7 +123,7 @@ export default function ResumePage() {
           ))}
         </dl>
       </section>
-      <section className="print-section mt-10 print:mt-7">
+      <section id="experience" className="print-section mt-10 print:mt-7">
         <SectionHeading index="04">Experience</SectionHeading>
         <div className="space-y-9 print:space-y-6">
           {experiences.map((exp) => (

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PrintButton from "@/components/PrintButton";
+import LearningSection from "@/components/LearningSection";
 import ProjectLinks from "@/components/ProjectLinks";
 import { Metrics, ProjectCover, ProjectHeader } from "@/components/CaseStudy";
 import { caseStudies, caseStudySummary } from "@/data/caseStudies";
@@ -26,6 +27,8 @@ export default function PortfolioPage() {
           {"문제와 구현 과정을 살펴보고,\n제가 맡은 역할과\n확인한 결과를 함께 기록합니다."}
         </p>
       </header>
+
+      <LearningSection />
 
       {/* ---------------------------------------------------------- projects */}
       <section className="mt-12">

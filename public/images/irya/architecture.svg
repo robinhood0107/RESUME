@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+<title id="title">IRYA, AI 화상면접 지원 구조도</title>
+<desc id="desc">저장소 README와 현재 코드의 주요 모듈 및 연결 경계를 요약한 구조도입니다.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#64748b" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="820" fill="white"/>
+<text x="35" y="43" font-size="28" font-family="sans-serif" font-weight="700" fill="#111827">IRYA, AI 화상면접 지원</text>
+<text x="615" y="268" font-size="16" fill="#475569" font-family="sans-serif">세션, 토큰 API</text>
+<path d="M600 230 V292" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M300 180 H260 V530 H100 V552" fill="none" stroke="#64748b" stroke-width="2"/>
+<text x="35" y="500" font-size="16" fill="#475569" font-family="sans-serif">클라이언트 ↔ 미디어</text>
+<path d="M600 470 V510 H302 V552" fill="none" stroke="#64748b" stroke-width="2" stroke-dasharray="6 5"/>
+<text x="330" y="500" font-size="16" fill="#475569" font-family="sans-serif">세션 제어</text>
+<path d="M600 470 V510 H897 V552" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="300" y="85" width="600" height="145" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="322" y="125" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">React, TypeScript, 프론트엔드 담당</text>
+<text x="322" y="165" font-size="20" fill="#334155" font-family="sans-serif">면접 준비 → 입장 → 기기 점검 → 진행, 검토</text>
+<text x="322" y="199" font-size="20" fill="#334155" font-family="sans-serif">라우팅, 화면 상태, 미디어 트랙 수명</text>
+<rect x="300" y="300" width="600" height="170" rx="8" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="322" y="340" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">FastAPI, 세션 API, 팀원 구현</text>
+<text x="322" y="380" font-size="20" fill="#334155" font-family="sans-serif">인증, 세션, 문서, 전사, 녹화 기록</text>
+<text x="322" y="414" font-size="20" fill="#334155" font-family="sans-serif">프론트엔드는 API, 이벤트 계약으로 연결</text>
+<rect x="30" y="560" width="545" height="180" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="52" y="600" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">LiveKit, AI Worker, 팀원 구현</text>
+<text x="52" y="640" font-size="20" fill="#334155" font-family="sans-serif">WebRTC 미디어 / STT 전사</text>
+<text x="52" y="674" font-size="20" fill="#334155" font-family="sans-serif">후속 질문, 근거 연결, 면접 분석</text>
+<rect x="625" y="560" width="545" height="180" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="647" y="600" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">기록, 검토 화면</text>
+<text x="647" y="640" font-size="20" fill="#334155" font-family="sans-serif">전사, 발화 ID, 원문 인용과 시간 정보</text>
+<text x="647" y="674" font-size="20" fill="#334155" font-family="sans-serif">목 응답과 실제 서버, 미디어 결과 구분</text>
+<text x="35" y="790" font-family="sans-serif" font-size="17" fill="#64748b">README, 현재 코드 기준 요약, 배포, 외부 서비스 실행 여부는 본문 검증 범위에 별도 표시</text>
+</svg>

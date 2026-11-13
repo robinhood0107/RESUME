@@ -7,7 +7,10 @@ export type Block =
   | { kind: "stack"; groups: { label: string; items: string[] }[] }
   | { kind: "metrics"; items: { value: string; label: string }[] }
   | { kind: "cards"; items: { title: string; text: string }[] }
-  | { kind: "screens"; layout: ScreenLayout; items: Screenshot[] }
+  | { kind: "screens"; layout: ScreenLayout; items: Screenshot[]; title?: string }
+  | { kind: "video"; title: string; description: string; poster: string; sources: { src: string; type: "video/mp4" | "video/webm" }[]; captions?: { src: string; srcLang: string; label: string } }
+  | { kind: "references"; items: { label: string; href: string }[] }
+  | { kind: "table"; headers: string[]; rows: string[][] }
   | { kind: "diagram"; caption?: string; stages: DiagramStage[] };
 
 /** phone = 세로 앱 스크린샷, wide = 16:9 발표/웹 화면 */
@@ -41,6 +44,8 @@ export type ProjectLinks = {
   appStore?: string;
   playStore?: string;
   live?: string;
+  presentation?: string;
+  introduction?: string;
   github?: string;
   frontend?: string;
   ai?: string;

@@ -16,7 +16,14 @@ class PdfExportContractTests(unittest.TestCase):
             links = {e["link"] for s in output[lang]["sections"] for e in s["entries"] if e["link"]}
             expected = {e["link"] for s in self.source[lang]["sections"] for e in s["entries"] if e["link"]}
             self.assertEqual(links, expected)
-            self.assertNotIn("about", output[lang])
+            self.assertEqual(output[lang]["about"], self.source[lang]["about"])
+            self.assertEqual(output[lang]["sections"][0]["title"], next(s["title"] for s in self.source[lang]["sections"] if s["id"] == "projects"))
+
+    def test_approved_result_is_preserved_in_both_languages(self):
+        output = export_data(self.source)
+        for lang, result in (("ko", "300/360건에서 0/360건"), ("en", "300/360 to 0/360")):
+            projects = output[lang]["sections"][0]["entries"]
+            self.assertEqual(sum(result in bullet for item in projects for bullet in item["bullets"]), 1)
 
     def test_private_path_is_rejected_before_export(self):
         source = copy.deepcopy(self.source)

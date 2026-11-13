@@ -1,8 +1,7 @@
 import { assetPath } from "@/data/profile";
-import { Fragment } from "react";
 import Image from "next/image";
 import ProjectLinks from "@/components/ProjectLinks";
-import SystemArchitectureSection from "@/components/SystemArchitectureSection";
+import { caseStudySummary } from "@/data/caseStudies";
 import type {
   Block,
   CaseStudy as CaseStudyType,
@@ -12,7 +11,7 @@ import type {
 } from "@/data/caseStudies";
 
 /** 서비스 공식 대표 이미지. 원본 비율 그대로, crop·mockup 없이 크게 보여준다. */
-export function ProjectCover({ cover }: { cover: Screenshot }) {
+export function ProjectCover({ cover, compact = false }: { cover: Screenshot; compact?: boolean }) {
   return (
     <figure className="print-keep print-cover mt-8 print:mt-5">
       <Image
@@ -21,7 +20,7 @@ export function ProjectCover({ cover }: { cover: Screenshot }) {
         width={cover.width}
         height={cover.height}
         sizes="(max-width: 860px) 100vw, 860px"
-        className="h-auto max-h-[440px] w-full border border-rule object-contain"
+        className={compact ? "h-56 w-full border border-rule object-contain" : "h-auto max-h-[440px] w-full border border-rule object-contain"}
       />
       {cover.caption && (
         <figcaption className="mt-2 text-[12px] leading-[1.55] text-muted">
@@ -62,14 +61,22 @@ function ScreenshotGrid({
           className={`print-keep ${isPhone ? "print-shot" : "print-shot-wide"}`}
         >
           <figure>
-            <Image
-              src={assetPath(shot.src)}
-              alt={shot.alt}
-              width={shot.width}
-              height={shot.height}
-              sizes={isPhone ? "(max-width: 768px) 45vw, 200px" : "(max-width: 640px) 100vw, 420px"}
-              className="h-auto w-full rounded-sm border border-rule object-contain"
-            />
+            <a
+              href={assetPath(shot.src)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${shot.title} 원본 이미지 열기 (새 창)`}
+            >
+              <Image
+                src={assetPath(shot.src)}
+                alt={shot.alt}
+                width={shot.width}
+                height={shot.height}
+                loading="lazy"
+                sizes={isPhone ? "(max-width: 768px) 45vw, 200px" : "(max-width: 640px) 100vw, 420px"}
+                className="h-auto w-full rounded-sm border border-rule object-contain"
+              />
+            </a>
             <figcaption className="mt-2">
               <span className="block text-[12.5px] font-semibold">{shot.title}</span>
               {shot.caption && (
@@ -191,9 +198,34 @@ function EngineeringCards({ items }: { items: { title: string; text: string }[] 
 
 function BlockView({ block }: { block: Block }) {
   switch (block.kind) {
+    case "table":
+      return (
+        <div className="max-w-full overflow-x-auto" tabIndex={0} role="region" aria-label="측정 조건과 수치 비교표">
+          <table className="w-full min-w-[620px] border-collapse text-left text-[13px] leading-[1.65]">
+            <thead>
+              <tr>{block.headers.map((header) => <th key={header} className="border-b border-ink px-3 py-2 font-semibold">{header}</th>)}</tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, index) => (
+                <tr key={index}>{row.map((cell, column) => <td key={column} className="border-b border-rule px-3 py-2 align-top">{cell}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    case "references":
+      return (
+        <ul className="space-y-2 text-[13px] leading-[1.7]">
+          {block.items.map((item) => (
+            <li key={item.href}>
+              <a href={item.href} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-4">{item.label} ↗</a>
+            </li>
+          ))}
+        </ul>
+      );
     case "text":
       return (
-        <p className="text-[15px] leading-[1.8] text-ink print:text-[10pt]">{block.text}</p>
+        <p className="break-keep text-[15px] leading-[1.8] text-ink print:text-[10pt]">{block.text}</p>
       );
 
     case "list":
@@ -233,7 +265,7 @@ function BlockView({ block }: { block: Block }) {
             <div key={group.label} className="grid grid-cols-1 gap-x-6 sm:grid-cols-[130px_1fr]">
               <dt className="text-[13px] font-semibold">{group.label}</dt>
               <dd className="text-[14px] leading-[1.7] text-muted print:text-[10pt]">
-                {group.items.join(" · ")}
+                {group.items.join(", ")}
               </dd>
             </div>
           ))}
@@ -247,7 +279,28 @@ function BlockView({ block }: { block: Block }) {
       return <EngineeringCards items={block.items} />;
 
     case "screens":
-      return <ScreenshotGrid layout={block.layout} items={block.items} />;
+      return block.title ? (
+        <details open className="group">
+          <summary className="cursor-pointer font-semibold">{block.title}</summary>
+          <div className="mt-4"><ScreenshotGrid layout={block.layout} items={block.items} /></div>
+        </details>
+      ) : <ScreenshotGrid layout={block.layout} items={block.items} />;
+
+    case "video":
+      return (
+        <figure>
+          <video controls playsInline preload="metadata" poster={assetPath(block.poster)} aria-label={block.title} className="h-auto w-full border border-rule">
+            {block.sources.map((source) => <source key={source.src} src={assetPath(source.src)} type={source.type} />)}
+            {block.captions && <track kind="captions" src={assetPath(block.captions.src)} srcLang={block.captions.srcLang} label={block.captions.label} default />}
+            {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download>영상 내려받기 ({source.type === "video/mp4" ? "MP4" : "WebM"})</a>)}
+          </video>
+          <figcaption className="mt-2 text-[13px] leading-[1.7] text-muted">
+            <span className="block font-semibold">{block.title}</span>
+            <span className="block">{block.description}</span>
+            {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download className="mr-4 underline underline-offset-4">영상 내려받기 ({source.type === "video/mp4" ? "MP4" : "WebM"})</a>)}
+          </figcaption>
+        </figure>
+      );
 
     case "diagram":
       return <Diagram caption={block.caption} stages={block.stages} />;
@@ -266,7 +319,7 @@ export function ProjectHeader({
   return (
     <header className="print-keep">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-        <Heading className="text-[24px] font-semibold tracking-tight sm:text-[28px]">
+        <Heading className="break-keep text-[24px] font-semibold tracking-tight sm:text-[28px]">
           <span className="mr-3 align-middle text-[14px] font-normal text-faint">
             {study.index}
           </span>
@@ -276,49 +329,74 @@ export function ProjectHeader({
       </div>
       <p className="mt-1.5 text-[16px] text-muted">{study.subtitle}</p>
       <p className="mt-3 text-[13px] text-faint">
-        {study.context} · {study.role}
+        {study.context}, {study.role}
       </p>
-      <p className="mt-3 text-[12.5px] leading-[1.7] text-faint">{study.stack.join(" · ")}</p>
+      <p className="mt-3 text-[12.5px] leading-[1.7] text-faint">{study.stack.join(", ")}</p>
     </header>
   );
 }
 
 export default function CaseStudy({ study }: { study: CaseStudyType }) {
+  const { overview, results } = caseStudySummary(study);
+  const architecture = study.sections.find((section) => section.heading === "System Architecture");
+  const architectureImage = architecture?.blocks.find((block) => block.kind === "screens");
+  const media = study.sections.flatMap((section) => section.blocks).filter((block) => (block.kind === "screens" || block.kind === "video") && block !== architectureImage);
   return (
     <article className="print-section border-t border-ink pt-8">
       <ProjectHeader study={study} as="h1" />
 
       {study.cover && <ProjectCover cover={study.cover} />}
 
-      {/* 상세 페이지에서는 이미 상세 안이므로 실제 서비스 링크만 노출한다. */}
+      {/* 실제 데모 주소가 확인되면 해당 링크를 별도로 추가한다. */}
       {study.links && (
         <div className="mt-6">
           <ProjectLinks links={{ ...study.links, caseStudy: undefined }} />
         </div>
       )}
 
+      <div className="mt-8 space-y-8">
+        <section>
+          <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">프로그램 요약</h2>
+          <BlockView block={{ kind: "text", text: overview }} />
+        </section>
+        <section>
+          <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">결론</h2>
+          <p className="mb-4 text-[14px] leading-[1.7] text-muted">{study.role}</p>
+          <Metrics items={results} />
+        </section>
+        {architectureImage && <BlockView block={architectureImage} />}
+        {media.map((block, i) => <BlockView key={i} block={block} />)}
+      </div>
+
       <div className="mt-10 space-y-10 print:mt-6 print:space-y-6">
-        {study.sections.map((section, index) => (
-          <Fragment key={section.heading}>
-            <section className="print-keep">
+        {study.sections.map((section) => {
+          const hasVisibleContent = section.blocks.some((block) =>
+            !media.includes(block) &&
+            !(section.heading === "Overview" && block.kind === "text" && block.text === overview) &&
+            !(section.heading === "System Architecture" && block === architectureImage) &&
+            !(section.heading === "Results" && block.kind === "metrics" && block.items.length <= results.length)
+          );
+          if (!hasVisibleContent) return null;
+          return (
+            <section key={section.heading} className="print-keep">
               <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">
                 {section.heading}
               </h2>
               <div className="space-y-4">
-                {section.blocks.map((block, i) => (
-                  <BlockView key={i} block={block} />
-                ))}
+                {section.blocks.map((block, i) => {
+                  if (media.includes(block)) return null;
+                  if ((section.heading === "Overview" && block.kind === "text" && block.text === overview) ||
+                      (section.heading === "System Architecture" && block === architectureImage)) return null;
+                  if (section.heading === "Results" && block.kind === "metrics") {
+                    const remaining = block.items.slice(results.length);
+                    return remaining.length ? <Metrics key={i} items={remaining} /> : null;
+                  }
+                  return <BlockView key={i} block={block} />;
+                })}
               </div>
             </section>
-            {/* 아키텍처 다이어그램은 Overview 바로 다음, 화면·엔지니어링 설명 앞에 둔다. */}
-            {index === 0 && study.systemArchitectureAlt && (
-              <SystemArchitectureSection
-                slug={study.slug}
-                alt={study.systemArchitectureAlt}
-              />
-            )}
-          </Fragment>
-        ))}
+          );
+        })}
       </div>
     </article>
   );

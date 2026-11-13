@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+<title id="title">문서, 이미지 번역 파이프라인 구조도</title>
+<desc id="desc">저장소 README와 현재 코드의 주요 모듈 및 연결 경계를 요약한 구조도입니다.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="none" stroke="#64748b" stroke-width="1.5"/></marker></defs>
+<rect width="1200" height="820" fill="white"/>
+<text x="35" y="43" font-size="28" font-family="sans-serif" font-weight="700" fill="#111827">문서, 이미지 번역 파이프라인</text>
+<path d="M600 230 V292" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M600 470 V510 H302 V552" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<path d="M600 470 V510 H897 V552" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="300" y="85" width="600" height="145" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="322" y="125" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">PySide6 데스크톱 앱</text>
+<text x="322" y="165" font-size="20" fill="#334155" font-family="sans-serif">문서 입력, 영역 편집, 결과 확인</text>
+<text x="322" y="199" font-size="20" fill="#334155" font-family="sans-serif">기존 comic-translate 위 유지보수 포크</text>
+<rect x="300" y="300" width="600" height="170" rx="8" fill="#eff6ff" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="322" y="340" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">Python 처리 파이프라인</text>
+<text x="322" y="380" font-size="20" fill="#334155" font-family="sans-serif">검출 → OCR → 번역 → 인페인팅 → 렌더링</text>
+<text x="322" y="414" font-size="20" fill="#334155" font-family="sans-serif">단계별 결과, 입력 신원, 캐시 무효화</text>
+<rect x="30" y="560" width="545" height="180" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="52" y="600" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">로컬 모델 실행 경로</text>
+<text x="52" y="640" font-size="20" fill="#334155" font-family="sans-serif">PaddleOCR-VL / HunyuanOCR, Gemma</text>
+<text x="52" y="674" font-size="20" fill="#334155" font-family="sans-serif">Docker, llama.cpp, 모델별 실행 경계</text>
+<rect x="625" y="560" width="545" height="180" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+<text x="647" y="600" font-size="23" font-weight="700" fill="#0f172a" font-family="sans-serif">프로젝트 저장, 실행 보고서</text>
+<text x="647" y="640" font-size="20" fill="#334155" font-family="sans-serif">결과 재사용, JSON / 텍스트 보고서</text>
+<text x="647" y="674" font-size="20" fill="#334155" font-family="sans-serif">벽시계 시간과 누적 작업량을 구분</text>
+<text x="35" y="790" font-family="sans-serif" font-size="17" fill="#64748b">README, 현재 코드 기준 요약, 배포, 외부 서비스 실행 여부는 본문 검증 범위에 별도 표시</text>
+</svg>

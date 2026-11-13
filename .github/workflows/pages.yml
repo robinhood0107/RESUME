@@ -34,7 +34,6 @@ jobs:
       - name: Check content and types
         run: |
           npm run verify
-          npm run typecheck
           npm run lint
       - name: Build Korean and English Typst PDFs
         run: |
@@ -42,6 +41,8 @@ jobs:
           python scripts/build_pdfs.py
       - name: Export static site
         run: npm run build
+      - name: Check types
+        run: npm run typecheck
       - name: Check exported pages and assets
         run: python scripts/check_export.py
       - uses: actions/upload-pages-artifact@v3

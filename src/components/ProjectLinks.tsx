@@ -11,7 +11,9 @@ const cta: { key: keyof Links; label: string; compactLabel?: string }[] = [
   { key: "ai", label: "AI Server ↗" },
   { key: "appStore", label: "App Store ↗" },
   { key: "playStore", label: "Google Play ↗" },
-  { key: "live", label: "Live Demo ↗" },
+  { key: "live", label: "서비스 열기 ↗" },
+  { key: "presentation", label: "발표 자료 ↗" },
+  { key: "introduction", label: "프로젝트 소개 ↗" },
   { key: "caseStudy", label: "View Details →", compactLabel: "Details →" },
 ];
 

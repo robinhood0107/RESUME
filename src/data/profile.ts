@@ -11,7 +11,7 @@ export const profile = {
   nameEn: resume.en.name,
   role: resume.ko.title,
   tagline: "백엔드와 AI 기능을 연결하고,\n실행 결과를 확인하며 개선합니다.",
-  summary: "Spring Boot·PostgreSQL 백엔드와 Python 기반 AI 기능을 연결하는 프로젝트를 해왔습니다. 주문·잔고의 상태 변경, 로컬 OCR·번역 모델 연동, NAS·OCI 셀프호스팅을 경험했습니다.",
+  summary: resume.ko.about,
   contacts: [
     { label: "Email", text: resume.ko.email, href: `mailto:${resume.ko.email}` },
     { label: "GitHub", text: "github.com/robinhood0107", href: GITHUB_URL },
@@ -23,20 +23,24 @@ export const profile = {
     { value: "Self-hosting", label: "NAS·OCI·Docker 운영" },
   ],
   principles: [
-    { title: "조건부터 확인합니다", text: "주문이나 송금처럼 상태가 바뀌는 작업은 입력과 규칙, 실패했을 때의 처리를 먼저 살핍니다." },
-    { title: "같은 입력으로 비교합니다", text: "OCR 요청 경로와 캐시를 바꿀 때 동일한 입력의 시간과 결과를 함께 확인했습니다." },
-    { title: "역할을 분명히 기록합니다", text: "팀원이 맡은 모델 학습과 화면 작업, 제가 맡은 백엔드와 연동 범위를 구분합니다." },
-    { title: "직접 운영하며 배웁니다", text: "NAS와 OCI에서 개인 서비스를 운영하며 캐시, 인증서, 요청 경로 문제를 확인하고 고쳤습니다." },
+    { title: "이해하고 바꿀 수 있게 만듭니다", text: "새 기술은 작은 실험부터 확인합니다. AI가 작성한 코드도 사용한 이유와 동작을 이해하고, 제가 설명하고 수정할 수 있는 상태를 만들려고 합니다." },
+    { title: "기준을 먼저 적습니다", text: "입력·출력·실패 조건과 모듈의 책임을 명세에 적습니다. 에이전트에게 한 번에 맡기는 범위를 나누고, 구현이 그 기준을 따르는지 확인합니다." },
+    { title: "같은 조건으로 확인합니다", text: "lint·타입 검사와 실행 테스트를 나누어 적용합니다. 오류와 경계 조건을 재현하고, 성능을 바꿀 때는 같은 입력의 결과와 시간을 함께 봅니다." },
+    { title: "다음에 읽을 수 있게 남깁니다", text: "선택한 이유는 주석과 설계 기록에, 확인한 결과는 테스트와 보고서에 남깁니다. 나중에 다시 검토하거나 확장할 때도 이해할 수 있는 코드를 지향합니다." },
   ],
   ai: {
-    stance: "AI의 해석과 실제 상태를 바꾸는 판단을 구분합니다.",
+    stance: "규모가 큰 졸업과제에서는 AI를 적극 활용합니다. 구현을 맡긴 뒤에도 사용한 기술과 변경 이유를 이해하고 명세·검사 도구·실행 결과로 통제할 수 있는 상황을 만들려 합니다.",
     evidence: [
-      "AI 자동매매 졸업과제에서 규칙 기반 후보 생성과 모델의 제외 신호, 주문 전 검사를 나누었습니다.",
-      "저는 PM과 주문 판단 백엔드를 맡았고, LSTM 학습·Return Engine·대시보드 UX는 팀원이 담당했습니다.",
-      "같은 데이터로 신호 결합 방식을 비교하고, 모의주문 시나리오에서 중복 제출 방지와 체결·잔고 반영을 확인했습니다.",
+      "AI 도구에 반복 구현과 테스트 초안, 검토를 맡기고 저는 설계 의도와 변경 내용을 이해하며 검증 결과를 직접 확인합니다. 커밋과 PR 진행은 제가 승인합니다.",
+      "졸업과제는 원칙·주문·검색·모델·배포가 얽혀 있어 API·데이터 계약을 나누고 lint·타입 검사와 단위·통합·회귀 테스트, 실행 하네스로 결과를 확인합니다.",
+      "PromptAirlock에서는 spec.md·AGENTS.md와 Phase별 완료 조건으로 작업 범위를 제한합니다. 타입으로 표현한 상태와 메모리·동시성 위험을 컴파일 시험과 sanitizer 등으로 확인합니다.",
+      "OCR 프로젝트의 실행 보고서는 정해진 데이터 형식과 생성 코드로 출력합니다. 문서도 같은 항목과 기준으로 남겨 이후 검토와 비교에 사용할 수 있게 합니다.",
+      "미국주식 모의투자는 설계·프로토타입에 AI를 활용했고 Net Zero Smart SCM은 직접 구축했습니다. 프로젝트마다 AI와 팀원이 맡은 범위를 구분해 적습니다.",
     ],
     caseStudy: "/portfolio/trading-coach/",
     caseStudyLabel: "AI 자동매매 졸업과제 케이스 스터디 보기 →",
+    practiceCaseStudy: "/portfolio/prompt-airlock/",
+    practiceCaseStudyLabel: "PromptAirlock의 설계·검증 방법 보기 →",
   },
 };
 

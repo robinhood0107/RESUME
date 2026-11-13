@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import PrintButton from "@/components/PrintButton";
 import ProjectLinks from "@/components/ProjectLinks";
 import { Metrics, ProjectCover, ProjectHeader } from "@/components/CaseStudy";
@@ -27,6 +28,7 @@ export default function PortfolioPage() {
         </p>
       </header>
 
+
       {/* ---------------------------------------------------------- projects */}
       <section className="mt-12">
         <div className="space-y-16 print:space-y-10">
@@ -36,8 +38,12 @@ export default function PortfolioPage() {
             return (
               <article key={study.slug} className="print-keep border-t border-ink pt-8">
                 <ProjectHeader study={study} />
+                {study.cover && study.links?.caseStudy && (
+                  <Link href={study.links.caseStudy} aria-label={`${study.name} 상세 보기`}>
+                    <ProjectCover cover={study.cover} compact />
+                  </Link>
+                )}
 
-                {study.cover && <ProjectCover cover={study.cover} />}
 
                 <p className="mt-8 text-[15px] leading-[1.8] print:mt-5 print:text-[10pt]">
                   {overview}

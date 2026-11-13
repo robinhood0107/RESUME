@@ -41,14 +41,14 @@ function Bullets({ items }: { items: readonly string[] }) {
 }
 
 function StackLine({ items }: { items: readonly string[] }) {
-  return <p className="mt-2.5 text-[12.5px] text-faint">{items.join(" · ")}</p>;
+  return <p className="mt-2.5 text-[12.5px] text-faint">{items.join(", ")}</p>;
 }
 
 export default function ResumePage() {
   return (
     <div className="mx-auto max-w-[860px] px-5 py-12 sm:px-8 sm:py-16 print:max-w-none print:px-0 print:py-0">
       <div className="no-print mb-8 flex flex-wrap justify-end gap-3 text-[13px] text-muted">
-        <a href={assetPath("/assets/pdf/resume-ko.pdf")} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-rule px-3 py-1.5 hover:border-ink hover:text-ink">한국어 PDF 보기·인쇄 ↗</a>
+        <a href={assetPath("/assets/pdf/resume-ko.pdf")} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-rule px-3 py-1.5 hover:border-ink hover:text-ink">한국어 PDF 보기와 인쇄 ↗</a>
         <a href={assetPath("/assets/pdf/resume-ko.pdf")} download className="rounded-sm border border-rule px-3 py-1.5 hover:border-ink hover:text-ink">PDF 다운로드 ↓</a>
         <a href={assetPath("/assets/pdf/resume-en.pdf")} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-rule px-3 py-1.5 hover:border-ink hover:text-ink">English PDF ↗</a>
       </div>
@@ -59,7 +59,7 @@ export default function ResumePage() {
               {profile.name}
             </h1>
             <p className="mt-1 text-[15px] text-muted">
-              {profile.nameEn} · {profile.role}
+              {profile.nameEn}, {profile.role}
             </p>
           </div>
           <ul className="text-[13px] leading-[1.7] text-muted sm:text-right">
@@ -84,30 +84,7 @@ export default function ResumePage() {
         <p className="text-[15px] leading-[1.75] print:text-[10.5pt]">{profile.summary}</p>
       </section>
       <section className="print-section mt-10 print:mt-7">
-        <SectionHeading index="02">Selected Projects</SectionHeading>
-        <div className="space-y-9 print:space-y-6">
-          {resumeProjects.map((project) => (
-            <article key={project.name} className="print-keep">
-              <ItemHead title={project.name} period={project.period} />
-              <p className="mt-1 text-[14px] text-muted">{project.role}</p>
-
-              <p className="mt-3 text-[14.5px] leading-[1.7] print:text-[10pt]">
-                {project.summary}
-              </p>
-              <Bullets items={project.bullets} />
-              <StackLine items={project.stack} />
-
-              {project.links && (
-                <div className="mt-2.5">
-                  <ProjectLinks links={project.links} compact />
-                </div>
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
-      <section className="print-section mt-10 print:mt-7">
-        <SectionHeading index="03">Skills</SectionHeading>
+        <SectionHeading index="02">Skills</SectionHeading>
         <dl className="space-y-3">
           {skills.map((group) => (
             <div
@@ -116,15 +93,15 @@ export default function ResumePage() {
             >
               <dt className="text-[13px] font-semibold">{group.category}</dt>
               <dd className="text-[14px] leading-[1.7] text-faint print:text-[10pt]">
-                <span className="font-medium text-ink">{group.strong.join(" · ")}</span>
-                {group.items.length > 0 && ` · ${group.items.join(" · ")}`}
+                <span className="font-medium text-ink">{group.strong.join(", ")}</span>
+                {group.items.length > 0 && <span className="text-[12.5px] print:text-[9pt]">, {group.items.join(", ")}</span>}
               </dd>
             </div>
           ))}
         </dl>
       </section>
-      <section className="print-section mt-10 print:mt-7">
-        <SectionHeading index="04">Experience</SectionHeading>
+      <section id="experience" className="print-section mt-10 print:mt-7">
+        <SectionHeading index="03">Experience</SectionHeading>
         <div className="space-y-9 print:space-y-6">
           {experiences.map((exp) => (
             <article key={exp.company} className="print-keep">
@@ -141,6 +118,15 @@ export default function ResumePage() {
       </section>
 
       <section className="print-section mt-10 print:mt-7">
+        <SectionHeading index="04">Education</SectionHeading>
+        {education.map((entry) => (
+          <div key={entry.title} className="print-keep">
+            <ItemHead title={entry.title} period={entry.caption} />
+            <p className="mt-1 text-[14px] text-muted">{entry.subtitle}</p>
+          </div>
+        ))}
+      </section>
+      <section className="print-section mt-10 print:mt-7">
         <SectionHeading index="05">Activities</SectionHeading>
         <ul className="space-y-6">
           {activities.map((activity) => (
@@ -154,13 +140,31 @@ export default function ResumePage() {
         </ul>
       </section>
       <section className="print-section mt-10 print:mt-7">
-        <SectionHeading index="06">Education</SectionHeading>
-        {education.map((entry) => (
-          <div key={entry.title} className="print-keep">
-            <ItemHead title={entry.title} period={entry.caption} />
-            <p className="mt-1 text-[14px] text-muted">{entry.subtitle}</p>
-          </div>
-        ))}
+        <SectionHeading index="06">Projects</SectionHeading>
+        <div className="space-y-9 print:space-y-6">
+          {resumeProjects.map((project) => (
+            <article key={project.name} className="print-keep grid gap-3 border-b border-rule pb-6 sm:grid-cols-[210px_1fr] sm:gap-8">
+              <div>
+                <h3 className="text-[17px] font-semibold tracking-tight">{project.name}</h3>
+                <p className="mt-1 text-[13px] text-faint">{project.period}</p>
+                <p className="mt-1 text-[14px] text-muted">{project.role}</p>
+              </div>
+              <div>
+              <p className="mt-3 text-[14.5px] leading-[1.7] print:text-[10pt]">
+                {project.summary}
+              </p>
+              <Bullets items={project.bullets} />
+              <StackLine items={project.stack} />
+
+              {project.links && (
+                <div className="mt-2.5">
+                  <ProjectLinks links={project.links} compact />
+                </div>
+              )}
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
     </div>
   );

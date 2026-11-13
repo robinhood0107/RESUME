@@ -13,6 +13,10 @@
   --color-accent: #1d4ed8;
 }
 
+* {
+  font-weight: 400 !important;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
 }

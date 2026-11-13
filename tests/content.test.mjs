@@ -175,11 +175,11 @@ test("동영상과 이미지 묶음이 하위 경로와 대체 링크를 포함�
 });
 
 
-test("동영상 자산은 로컬 MP4와 설명을 포함한다", () => {
+test("동영상 자산은 MP4와 WebM 대체본 및 설명을 포함한다", () => {
   for (const study of studies) {
     for (const block of study.sections.flatMap(section => section.blocks).filter(block => block.kind === "video")) {
       assert.ok(block.title && block.description && block.sources.length);
-      assert.equal(block.sources[0].type, "video/mp4");
+      assert.deepEqual(block.sources.map(source => source.type), ["video/mp4", "video/webm"]);
       for (const source of block.sources) {
         assert.match(source.src, source.type === "video/mp4" ? /^\/(?:videos|portfolio-media)\/[a-zA-Z0-9_/-]+\.mp4$/ : /^\/(?:videos|portfolio-media)\/[a-zA-Z0-9_/-]+\.webm$/);
         assert.ok(["video/mp4", "video/webm"].includes(source.type));

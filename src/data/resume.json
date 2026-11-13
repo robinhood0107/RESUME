@@ -19,9 +19,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "RAG: PostgreSQL, pgvector 자료 분리, 검색 권한 및 인용, 숫자 재검증",
-              "로컬 OCR, LLM: Docker, llama.cpp에서 PaddleOCR-VL, HunyuanOCR, Gemma 실행 경로 연동",
-              "팀 AI 서버: vLLM, Ollama, GPT-SoVITS의 Docker, GPU 설정 및 전환 스크립트 작성"
+              "로컬 OCR과 LLM 실행 경로 연동",
+              "PaddleOCR-VL, HunyuanOCR, Gemma, llama.cpp"
             ]
           },
           {
@@ -32,9 +31,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "주력: Java, Kotlin, Spring Boot, Python, FastAPI, PostgreSQL",
-              "REST API, SQL, 트랜잭션, 잠금, DB 제약조건, 오류, 상태 전이 처리",
-              "사용 경험: MySQL, Redis, WebSocket/STOMP"
+              "Java, Spring Boot, Python",
+              "Kotlin, FastAPI, PostgreSQL, Redis, WebSocket 사용 경험"
             ]
           },
           {
@@ -45,8 +43,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Docker, Linux, GitHub Actions, Nginx, NAS, OCI 개인 서비스 운영",
-              "Windows 설치, 실행 자동화, pytest, JUnit과 재현 가능한 성능 측정"
+              "Docker, Linux",
+              "NAS와 OCI 개인 서비스 운영, GitHub Actions, Nginx"
             ]
           },
           {
@@ -58,19 +56,7 @@
             "additional_links": [],
             "bullets": [
               "Kotlin Android, Jetpack Compose, Room 앱 프로젝트 경험",
-              "Git, GitHub PR, 기술 문서와 프로젝트 간 API 계약 조율"
-            ]
-          },
-          {
-            "title": "개발, 검증 방식",
-            "subtitle": "",
-            "caption": "",
-            "link": "",
-            "link_text": "GitHub",
-            "additional_links": [],
-            "bullets": [
-              "명세와 작업 범위, 완료 기준을 정하고 변경 내용과 결과를 직접 확인합니다. 커밋과 PR 진행은 제가 승인합니다.",
-              "정적 분석과 단위, 통합, 회귀 시험을 나누고 설계 기록과 보고서로 검토와 유지보수를 돕습니다."
+              "pytest, JUnit과 동일 입력 비교"
             ]
           },
           {
@@ -300,9 +286,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "RAG: PostgreSQL and pgvector storage, access-aware retrieval, citation and number checks",
-              "Local OCR and LLM: connected PaddleOCR-VL, HunyuanOCR and Gemma runtimes through Docker and llama.cpp",
-              "Team AI server: wrote Docker, GPU setup and switching scripts for vLLM, Ollama and GPT-SoVITS"
+              "Connected local OCR and LLM runtimes",
+              "PaddleOCR-VL, HunyuanOCR, Gemma and llama.cpp"
             ]
           },
           {
@@ -313,9 +298,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Primary: Java, Kotlin, Spring Boot, Python, FastAPI, PostgreSQL",
-              "REST APIs, SQL, transactions, locking, database constraints, error and state handling",
-              "Also used: MySQL, Redis, WebSocket/STOMP"
+              "Java, Spring Boot and Python",
+              "Project experience with Kotlin, FastAPI, PostgreSQL, Redis and WebSocket"
             ]
           },
           {
@@ -326,8 +310,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Docker, Linux, GitHub Actions, Nginx, personal NAS and OCI services",
-              "Windows setup and run automation, pytest and JUnit, reproducible benchmarks"
+              "Docker and Linux",
+              "Personal NAS and OCI services, GitHub Actions and Nginx"
             ]
           },
           {
@@ -338,20 +322,8 @@
             "link_text": "GitHub",
             "additional_links": [],
             "bullets": [
-              "Kotlin Android, Jetpack Compose and Room project experience",
-              "Git, GitHub pull requests, technical documentation and cross-project API contracts"
-            ]
-          },
-          {
-            "title": "Development and Verification",
-            "subtitle": "",
-            "caption": "",
-            "link": "",
-            "link_text": "GitHub",
-            "additional_links": [],
-            "bullets": [
-              "Set specifications, task boundaries and completion criteria, and directly check changes and results. I approve commits and PRs.",
-              "Use static analysis and unit, integration and regression tests, with design records and reports to support review and maintenance."
+              "Kotlin Android, Jetpack Compose and Room app project experience",
+              "pytest, JUnit and same-input comparisons"
             ]
           },
           {

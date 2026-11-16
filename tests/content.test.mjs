@@ -193,10 +193,10 @@ test("동영상과 이미지 묶음이 하위 경로와 대체 링크를 포함�
     { kind: "video", title: "시연", description: "시연 내용 설명", poster: "/images/poster.png", sources: [{ src: "/videos/demo.mp4", type: "video/mp4" }, { src: "/videos/demo.webm", type: "video/webm" }], captions: { src: "/videos/demo.vtt", srcLang: "ko", label: "한국어" } },
   ] }] };
   const html = renderToStaticMarkup(createElement(compiledModule.exports.default, { study }));
-  assert.doesNotMatch(html.match(/<details([^>]*)>/)[1], /\bopen\b/);
-  assert.match(html, /화면과 시연 보기/);
+  assert.doesNotMatch(html, /<(?:details|summary)\b/);
+  assert.match(html, /화면과 시연/);
   assert.equal((html.match(/<video/g) || []).length, 1);
-  assert.match(html, /<details[^>]*><summary[^>]*>화면 흐름/);
+  assert.match(html, /<h3[^>]*>화면 흐름/);
   assert.match(html, /src="\/RESUME\/images\/example.png"[^>]*loading="lazy"/);
   assert.match(html, /<video[^>]*controls=""[^>]*playsInline=""[^>]*preload="metadata"[^>]*poster="\/RESUME\/images\/poster.png"/);
   assert.doesNotMatch(html.match(/<video[^>]*>/)[0], /\s(?:autoPlay|autoplay|muted)=/);

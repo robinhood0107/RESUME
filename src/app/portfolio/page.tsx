@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import PrintButton from "@/components/PrintButton";
 import ProjectLinks from "@/components/ProjectLinks";
-import { Metrics, ProjectHeader } from "@/components/CaseStudy";
+import { ProjectHeader } from "@/components/CaseStudy";
 import { caseStudies, caseStudySummary } from "@/data/caseStudies";
 import { ogBase, profile, SITE_URL } from "@/data/profile";
 
@@ -32,7 +32,8 @@ export default function PortfolioPage() {
       <section className="mt-12">
         <div className="space-y-16 print:space-y-10">
           {caseStudies.map((study) => {
-            const { overview, results } = caseStudySummary(study);
+            const { overview } = caseStudySummary(study);
+            const result = study.sections.find((section) => section.heading === "Results")?.blocks.find((block) => block.kind === "text");
 
             return (
               <article key={study.slug} className="print-keep border-t border-ink pt-8">
@@ -41,10 +42,8 @@ export default function PortfolioPage() {
                   {overview}
                 </p>
 
-                {results.length > 0 && (
-                  <div className="mt-6">
-                    <Metrics items={results} />
-                  </div>
+                {result?.kind === "text" && (
+                  <p className="mt-4 text-[14px] leading-[1.75] text-muted">{result.text}</p>
                 )}
 
                 {study.links && (

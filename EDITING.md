@@ -18,7 +18,7 @@ npm run build:pdf
 
 각 프로젝트의 `architecture.svg`는 README·현재 코드에 근거한 구조도입니다. 모듈과 연결을 바꿀 때 `Product`, `System Architecture`, `Development`, `Results`도 함께 대조합니다. 원본 이미지는 새 탭으로 열 수 있으며, `references` 블록에는 HTTPS 근거 링크를 둡니다.
 
-상세 본문은 Overview, Problem, Product, System Architecture, Development, Results 순서로 짧게 설명합니다. 주요 기능과 본인 역할, 선택 이유 및 확인한 결과를 남기고 언어별 설계나 검증 절차를 반복해서 나열하지 않습니다. 수치에는 입력과 조건 및 재현 범위를 붙이며 이전의 상세 설명은 Git 이력에 보존합니다. 화면과 시연은 삭제하지 않고 본문 뒤에서 펼쳐 볼 수 있게 묶습니다. 캡처 설명에는 날짜를 붙이지 않습니다.
+상세 본문은 Overview, Problem, Product, System Architecture, Development, Results 순서로 짧게 설명합니다. 주요 기능과 본인 역할, 선택 이유 및 확인한 결과를 남기고 언어별 설계나 검증 절차를 반복해서 나열하지 않습니다. 수치에는 입력과 조건 및 재현 범위를 붙이며 이전의 상세 설명은 Git 이력에 보존합니다. 화면과 시연은 본문에 바로 보이게 배치하며 접기 UI를 사용하지 않습니다. 목록은 프로젝트 정보, 짧은 소개와 결과, 상세 링크 순서로 구성합니다. 캡처 설명에는 날짜를 붙이지 않습니다.
 
 Home과 Portfolio의 학습 분류는 `src/data/learning.json`에서 함께 관리합니다. 제공된 강의·수업 연습과 직접 구현한 제품을 구분하고, 공개 저장소만 외부 링크로 연결합니다. 비공개 학습·운영 기록은 설명 또는 관련 내부 사례로 연결합니다.
 

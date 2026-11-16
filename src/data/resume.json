@@ -248,21 +248,6 @@
             ]
           }
         ]
-      },
-      {
-        "id": "education",
-        "title": "Education",
-        "entries": [
-          {
-            "title": "대학교",
-            "subtitle": "정보컴퓨터공학부 컴퓨터공학전공",
-            "caption": "2027.02 졸업 예정",
-            "link": "",
-            "link_text": "GitHub",
-            "additional_links": [],
-            "bullets": []
-          }
-        ]
       }
     ]
   },
@@ -512,21 +497,6 @@
             "bullets": [
               "Completed the Agentic AI Service Development program and received a certificate of completion."
             ]
-          }
-        ]
-      },
-      {
-        "id": "education",
-        "title": "Education",
-        "entries": [
-          {
-            "title": "University",
-            "subtitle": "Computer Science and Engineering",
-            "caption": "Expected graduation: Feb 2027",
-            "link": "",
-            "link_text": "GitHub",
-            "additional_links": [],
-            "bullets": []
           }
         ]
       }

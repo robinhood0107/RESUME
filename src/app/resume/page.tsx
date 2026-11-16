@@ -5,7 +5,7 @@ import { assetPath, ogBase, profile, SITE_URL } from "@/data/profile";
 import { skills } from "@/data/skills";
 import { experiences } from "@/data/experience";
 import { resumeProjects } from "@/data/projects";
-import { activities, education } from "@/data/activities";
+import { activities } from "@/data/activities";
 
 export const metadata: Metadata = {
   title: "Resume",
@@ -118,16 +118,7 @@ export default function ResumePage() {
       </section>
 
       <section className="print-section mt-10 print:mt-7">
-        <SectionHeading index="04">Education</SectionHeading>
-        {education.map((entry) => (
-          <div key={entry.title} className="print-keep">
-            <ItemHead title={entry.title} period={entry.caption} />
-            <p className="mt-1 text-[14px] text-muted">{entry.subtitle}</p>
-          </div>
-        ))}
-      </section>
-      <section className="print-section mt-10 print:mt-7">
-        <SectionHeading index="05">Activities</SectionHeading>
+        <SectionHeading index="04">Activities</SectionHeading>
         <ul className="space-y-6">
           {activities.map((activity) => (
             <li key={activity.title} className="print-keep">
@@ -140,7 +131,7 @@ export default function ResumePage() {
         </ul>
       </section>
       <section className="print-section mt-10 print:mt-7">
-        <SectionHeading index="06">Projects</SectionHeading>
+        <SectionHeading index="05">Projects</SectionHeading>
         <div className="space-y-9 print:space-y-6">
           {resumeProjects.map((project) => (
             <article key={project.name} className="print-keep grid gap-3 border-b border-rule pb-6 sm:grid-cols-[210px_1fr] sm:gap-8">

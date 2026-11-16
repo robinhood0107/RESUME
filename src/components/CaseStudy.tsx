@@ -1,7 +1,6 @@
 import { assetPath } from "@/data/profile";
 import Image from "next/image";
 import ProjectLinks from "@/components/ProjectLinks";
-import { caseStudySummary } from "@/data/caseStudies";
 import type {
   Block,
   CaseStudy as CaseStudyType,
@@ -11,7 +10,7 @@ import type {
 } from "@/data/caseStudies";
 
 /** 서비스 공식 대표 이미지. 원본 비율 그대로, crop·mockup 없이 크게 보여준다. */
-export function ProjectCover({ cover, compact = false }: { cover: Screenshot; compact?: boolean }) {
+export function ProjectCover({ cover }: { cover: Screenshot }) {
   return (
     <figure className="print-keep print-cover mt-8 print:mt-5">
       <Image
@@ -20,7 +19,7 @@ export function ProjectCover({ cover, compact = false }: { cover: Screenshot; co
         width={cover.width}
         height={cover.height}
         sizes="(max-width: 860px) 100vw, 860px"
-        className={compact ? "h-56 w-full border border-rule object-contain" : "h-auto max-h-[440px] w-full border border-rule object-contain"}
+        className="h-auto max-h-[440px] w-full border border-rule object-contain"
       />
       {cover.caption && (
         <figcaption className="mt-2 text-[12px] leading-[1.55] text-muted">
@@ -337,66 +336,42 @@ export function ProjectHeader({
 }
 
 export default function CaseStudy({ study }: { study: CaseStudyType }) {
-  const { overview, results } = caseStudySummary(study);
-  const architecture = study.sections.find((section) => section.heading === "System Architecture");
-  const architectureImage = architecture?.blocks.find((block) => block.kind === "screens");
-  const media = study.sections.flatMap((section) => section.blocks).filter((block) => (block.kind === "screens" || block.kind === "video") && block !== architectureImage);
+  const cover = study.cover?.src.endsWith("/architecture.svg") ? undefined : study.cover;
+  const media = study.sections
+    .flatMap((section) => section.blocks)
+    .filter((block) => (block.kind === "screens" && !block.items.some((item) => item.src.endsWith("/architecture.svg"))) || block.kind === "video");
+
   return (
     <article className="print-section border-t border-ink pt-8">
       <ProjectHeader study={study} as="h1" />
-
-      {study.cover && <ProjectCover cover={study.cover} />}
-
-      {/* 실제 데모 주소가 확인되면 해당 링크를 별도로 추가한다. */}
       {study.links && (
         <div id={study.slug === "prompt-airlock" ? "presentation-materials" : undefined} className="mt-6">
           <ProjectLinks links={{ ...study.links, caseStudy: undefined }} />
         </div>
       )}
 
-      <div className="mt-8 space-y-8">
-        <section>
-          <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">프로그램 요약</h2>
-          <BlockView block={{ kind: "text", text: overview }} />
-        </section>
-        <section>
-          <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">결론</h2>
-          <p className="mb-4 text-[14px] leading-[1.7] text-muted">{study.role}</p>
-          <Metrics items={results} />
-        </section>
-        {architectureImage && <BlockView block={architectureImage} />}
-        {media.map((block, i) => <BlockView key={i} block={study.slug === "document-translate" && block.kind === "screens" ? { ...block, items: block.items.filter((item) => item.src !== study.cover?.src) } : block} />)}
-      </div>
-
       <div className="mt-10 space-y-10 print:mt-6 print:space-y-6">
-        {study.sections.map((section) => {
-          const hasVisibleContent = section.blocks.some((block) =>
-            !media.includes(block) &&
-            !(section.heading === "Overview" && block.kind === "text" && block.text === overview) &&
-            !(section.heading === "System Architecture" && block === architectureImage) &&
-            !(section.heading === "Results" && block.kind === "metrics" && block.items.length <= results.length)
-          );
-          if (!hasVisibleContent) return null;
-          return (
-            <section key={section.heading} className="print-keep">
-              <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">
-                {section.heading}
-              </h2>
-              <div className="space-y-4">
-                {section.blocks.map((block, i) => {
-                  if (media.includes(block)) return null;
-                  if ((section.heading === "Overview" && block.kind === "text" && block.text === overview) ||
-                      (section.heading === "System Architecture" && block === architectureImage)) return null;
-                  if (section.heading === "Results" && block.kind === "metrics") {
-                    const remaining = block.items.slice(results.length);
-                    return remaining.length ? <Metrics key={i} items={remaining} /> : null;
-                  }
-                  return <BlockView key={i} block={block} />;
-                })}
-              </div>
-            </section>
-          );
-        })}
+        {study.sections.filter((section) => section.heading !== "화면과 시연").map((section) => (
+          <section key={section.heading} className="print-keep">
+            <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">
+              {section.heading}
+            </h2>
+            <div className="space-y-4">
+              {section.blocks.map((block, i) => <BlockView key={i} block={block} />)}
+            </div>
+          </section>
+        ))}
+        {(cover || media.length > 0) && (
+          <details className="border-t border-rule pt-5">
+            <summary className="cursor-pointer text-[14px] font-semibold">화면과 시연 보기</summary>
+            <div className="mt-5 space-y-8">
+              {cover && <ProjectCover cover={cover} />}
+              {media.map((block, i) => (
+                <BlockView key={i} block={block.kind === "screens" ? { ...block, items: block.items.filter((item) => item.src !== study.cover?.src) } : block} />
+              ))}
+            </div>
+          </details>
+        )}
       </div>
     </article>
   );

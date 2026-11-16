@@ -16,9 +16,9 @@ npm run build:pdf
 
 이미지는 `public/images/<slug>/`에 둡니다. 실제 크기와 캡션을 데이터에 기록하며, 기존 캡처와 새 실행 캡처의 출처를 구분합니다. 홈 소개와 연락처는 `src/data/profile.ts`에서 수정합니다.
 
-각 프로젝트의 `architecture.svg`는 README·현재 코드에 근거한 구조도입니다. 모듈과 연결을 바꿀 때 `Scope & Modules`·`System Architecture`·`Language & Design`·`Test Strategy`도 함께 대조합니다. 원본 이미지는 새 탭으로 열 수 있으며, `references` 블록에는 HTTPS 근거 링크를 둡니다.
+각 프로젝트의 `architecture.svg`는 README·현재 코드에 근거한 구조도입니다. 모듈과 연결을 바꿀 때 `Product`, `System Architecture`, `Development`, `Results`도 함께 대조합니다. 원본 이미지는 새 탭으로 열 수 있으며, `references` 블록에는 HTTPS 근거 링크를 둡니다.
 
-`Measured Results`의 비교표에는 입력·조건·단위와 직접 실행/기존 기록의 범위를 함께 적습니다. 같은 표본의 결과끼리 비교하며, 원본 보고서의 숫자가 다르면 버전별로 구분합니다. 캡처·검증 설명에 날짜는 붙이지 않습니다.
+상세 본문은 Overview, Problem, Product, System Architecture, Development, Results 순서로 짧게 설명합니다. 주요 기능과 본인 역할, 선택 이유 및 확인한 결과를 남기고 언어별 설계나 검증 절차를 반복해서 나열하지 않습니다. 수치에는 입력과 조건 및 재현 범위를 붙이며 이전의 상세 설명은 Git 이력에 보존합니다. 화면과 시연은 삭제하지 않고 본문 뒤에서 펼쳐 볼 수 있게 묶습니다. 캡처 설명에는 날짜를 붙이지 않습니다.
 
 Home과 Portfolio의 학습 분류는 `src/data/learning.json`에서 함께 관리합니다. 제공된 강의·수업 연습과 직접 구현한 제품을 구분하고, 공개 저장소만 외부 링크로 연결합니다. 비공개 학습·운영 기록은 설명 또는 관련 내부 사례로 연결합니다.
 

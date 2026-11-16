@@ -6,7 +6,6 @@ import { resolve } from "node:path";
 const studies = JSON.parse(readFileSync(new URL("../src/data/case-studies.json", import.meta.url)));
 const resume = JSON.parse(readFileSync(new URL("../src/data/resume.json", import.meta.url)));
 const learning = JSON.parse(readFileSync(new URL("../src/data/learning.json", import.meta.url)));
-const resultHeadings = new Set(["Measured Results", "구현 범위", "구현 및 검증"]);
 const datePattern = /\b20\d{2}-\d{2}-\d{2}\b|20\d{2}년\s*\d{1,2}월\s*\d{1,2}일/;
 const captionText = data => JSON.stringify(data.flatMap(study => study.sections.flatMap(section => section.blocks).flatMap(block => block.kind === "screens" ? block.items.map(item => item.caption) : block.kind === "video" ? [block.description] : [])));
 
@@ -24,15 +23,12 @@ test("각 프로젝트의 상세 경로와 공개 링크가 고유하고 유효�
       if (key === "github") assert.equal(url.hostname, "github.com", study.slug);
     }
     if (study.links.live) assert.notEqual(study.links.live, study.links.presentation, study.slug);
-    assert.ok(study.sections.find(s => s.heading === "Overview"));
-    assert.ok(study.sections.find(s => s.heading === "Role"));
-    assert.ok(study.sections.find(s => s.heading === "System Architecture"));
-    assert.ok(study.sections.find(s => s.heading === "Scope & Modules"));
-    assert.ok(study.sections.find(s => s.heading === "Language & Design"));
-    assert.ok(study.sections.find(s => s.heading === "Test Strategy"));
-    assert.equal(study.sections.filter(s => resultHeadings.has(s.heading)).length, 1, study.slug);
-    assert.ok(study.sections.find(s => s.heading === "Problem"));
-    assert.ok(study.sections.find(s => s.heading === "Results"));
+    assert.deepEqual(study.sections.slice(0, 6).map(section => section.heading), [
+      "Overview", "Problem", "Product", "System Architecture", "Development", "Results",
+    ]);
+    assert.ok(study.sections.find(section => section.heading === "Product").blocks[0].items.length >= 3);
+    assert.ok(study.sections.find(section => section.heading === "Development").blocks[0].text);
+    assert.ok(study.sections.find(section => section.heading === "Results").blocks[0].text);
     assert.equal(new Set(study.sections.map(s => s.heading)).size, study.sections.length);
   }
 });
@@ -91,20 +87,15 @@ test("학습 기록은 공개 출처 또는 존재하는 내부 사례로 연결
   }
 });
 
-test("수치 비교표의 열과 행이 일치하고 조건 설명이 있다", () => {
-  for (const study of studies) {
-    const measured = study.sections.find(s => resultHeadings.has(s.heading));
-    assert.ok(measured, study.slug);
-    const tables = measured.blocks.filter(b => b.kind === "table");
-    assert.ok(tables.length > 0, study.slug);
-    for (const table of tables) {
-      assert.ok(table.headers.length >= 3 && table.rows.length > 0);
-      for (const row of table.rows) {
-        assert.equal(row.length, table.headers.length, study.slug);
-        assert.ok(row.every(cell => typeof cell === "string" && cell.trim()));
-      }
-    }
-  }
+test("개선 수치는 같은 입력과 재현 범위를 함께 설명한다", () => {
+  const result = slug => studies.find(study => study.slug === slug).sections.find(section => section.heading === "Results").blocks[0].text;
+  assert.match(result("prompt-airlock"), /합성 정상 문서 2,000개/);
+  assert.match(result("prompt-airlock"), /64\.4%에서 3\.8%/);
+  assert.match(result("irya"), /저장 계층.*사후 재현/);
+  assert.match(result("irya"), /360건 중 300건에서 0건/);
+  assert.match(result("document-translate"), /일본어 6페이지/);
+  assert.match(result("document-translate"), /2회 실행의 중앙값/);
+  assert.match(result("document-translate"), /OCR 실행 구간/);
 });
 
 test("구조도와 근거 링크가 실제 공개 자산과 HTTPS 출처를 가리킨다", () => {
@@ -197,11 +188,14 @@ test("동영상과 이미지 묶음이 하위 경로와 대체 링크를 포함�
     "next/image": { __esModule: true, default: props => createElement("img", props) },
   };
   runInNewContext(compiled, { module: compiledModule, exports: compiledModule.exports, require: name => imports[name] ?? require(name) });
-  const study = { index: "1", name: "예시", subtitle: "예시", context: "팀", role: "역할", stack: [], sections: [{ heading: "자료", blocks: [
+  const study = { index: "1", name: "예시", subtitle: "예시", context: "팀", role: "역할", stack: [], sections: [{ heading: "화면과 시연", blocks: [
     { kind: "screens", title: "화면 흐름", layout: "wide", items: [{ src: "/images/example.png", title: "화면", alt: "화면 설명", width: 640, height: 360 }] },
     { kind: "video", title: "시연", description: "시연 내용 설명", poster: "/images/poster.png", sources: [{ src: "/videos/demo.mp4", type: "video/mp4" }, { src: "/videos/demo.webm", type: "video/webm" }], captions: { src: "/videos/demo.vtt", srcLang: "ko", label: "한국어" } },
   ] }] };
   const html = renderToStaticMarkup(createElement(compiledModule.exports.default, { study }));
+  assert.doesNotMatch(html.match(/<details([^>]*)>/)[1], /\bopen\b/);
+  assert.match(html, /화면과 시연 보기/);
+  assert.equal((html.match(/<video/g) || []).length, 1);
   assert.match(html, /<details[^>]*><summary[^>]*>화면 흐름/);
   assert.match(html, /src="\/RESUME\/images\/example.png"[^>]*loading="lazy"/);
   assert.match(html, /<video[^>]*controls=""[^>]*playsInline=""[^>]*preload="metadata"[^>]*poster="\/RESUME\/images\/poster.png"/);
@@ -214,6 +208,12 @@ test("동영상과 이미지 묶음이 하위 경로와 대체 링크를 포함�
   const noDuplicate = renderToStaticMarkup(createElement(compiledModule.exports.default, { study }));
   assert.equal((noDuplicate.match(/>시연<\/span>/g) || []).length, 1);
   assert.match(html, /href="\/RESUME\/videos\/demo.mp4" download=""/);
+  const architecture = { src: "/images/example/architecture.svg", title: "구조도", alt: "구조도", width: 640, height: 360 };
+  const architectureOnly = { ...study, cover: architecture, sections: [{ heading: "System Architecture", blocks: [{ kind: "screens", layout: "wide", items: [architecture] }] }] };
+  const noRepeatedCover = renderToStaticMarkup(createElement(compiledModule.exports.default, { study: architectureOnly }));
+  assert.equal((noRepeatedCover.match(/src="\/RESUME\/images\/example\/architecture.svg"/g) || []).length, 1);
+  assert.doesNotMatch(noRepeatedCover, /화면과 시연 보기/);
+
 });
 
 

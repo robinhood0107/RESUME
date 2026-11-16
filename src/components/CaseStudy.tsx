@@ -279,10 +279,10 @@ function BlockView({ block }: { block: Block }) {
 
     case "screens":
       return block.title ? (
-        <details open className="group">
-          <summary className="cursor-pointer font-semibold">{block.title}</summary>
+        <div>
+          <h3 className="font-semibold">{block.title}</h3>
           <div className="mt-4"><ScreenshotGrid layout={block.layout} items={block.items} /></div>
-        </details>
+        </div>
       ) : <ScreenshotGrid layout={block.layout} items={block.items} />;
 
     case "video":
@@ -362,15 +362,15 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
           </section>
         ))}
         {(cover || media.length > 0) && (
-          <details className="border-t border-rule pt-5">
-            <summary className="cursor-pointer text-[14px] font-semibold">화면과 시연 보기</summary>
+          <section className="border-t border-rule pt-5">
+            <h2 className="text-[14px] font-semibold">화면과 시연</h2>
             <div className="mt-5 space-y-8">
               {cover && <ProjectCover cover={cover} />}
               {media.map((block, i) => (
                 <BlockView key={i} block={block.kind === "screens" ? { ...block, items: block.items.filter((item) => item.src !== study.cover?.src) } : block} />
               ))}
             </div>
-          </details>
+          </section>
         )}
       </div>
     </article>

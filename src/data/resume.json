@@ -1,7 +1,7 @@
 {
   "ko": {
     "language": "ko",
-    "name": "박종진",
+    "name": "개발 포트폴리오",
     "title": "백엔드 / AI 응용 개발자",
     "about": "사용자의 요청이 안전하게 처리되고 결과를 다시 확인할 수 있도록 백엔드와 데이터 흐름을 설계합니다. AI Trading Coach 졸업과제에서 PM과 주문 판단 백엔드를 맡아 투자 원칙, 모델 신호와 모의주문을 연결했습니다.\n\n기존 comic-translate를 유지보수하며 OCR 요청 경로와 반복 처리 방식을 개선했습니다. 미국주식 모의투자 서비스에서는 주문에 따른 지갑과 보유 종목의 변경을 한 트랜잭션으로 묶었습니다. 개인 NAS와 OCI에서 서비스를 운영하고 있습니다.",
     "email": "pjj4678@gmail.com",
@@ -117,8 +117,8 @@
             "title": "IRYA 화상면접 지원 서비스",
             "subtitle": "팀 프로젝트, 프론트엔드 주담당",
             "caption": "카카오테크캠퍼스 팀 프로젝트",
-            "link": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
-            "link_text": "Team GitHub",
+            "link": "https://robinhood0107.github.io/RESUME/portfolio/irya/",
+            "link_text": "프로젝트 상세",
             "additional_links": [],
             "bullets": [
               "화상면접의 준비와 진행, 검토 흐름을 연결하는 프론트엔드를 주로 맡고 다른 프론트엔드 담당자와 협의하며 교차 확인했습니다.",
@@ -240,8 +240,8 @@
             "title": "카카오테크캠퍼스 Agentic AI",
             "subtitle": "Agentic AI 서비스 개발 과정 수료",
             "caption": "2026.05.18 ~ 2026.11.20",
-            "link": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
-            "link_text": "Team GitHub",
+            "link": "https://robinhood0107.github.io/RESUME/portfolio/irya/",
+            "link_text": "프로젝트 상세",
             "additional_links": [],
             "bullets": [
               "Agentic AI 서비스 개발 과정을 이수하고 수료증을 받았습니다."
@@ -254,7 +254,7 @@
         "title": "Education",
         "entries": [
           {
-            "title": "부산대학교",
+            "title": "대학교",
             "subtitle": "정보컴퓨터공학부 컴퓨터공학전공",
             "caption": "2027.02 졸업 예정",
             "link": "",
@@ -268,7 +268,7 @@
   },
   "en": {
     "language": "en",
-    "name": "Jongjin Park",
+    "name": "Developer Portfolio",
     "title": "Backend Engineer / AI Applications",
     "about": "I design backend and data flows so requests can be handled safely and results can be checked. As PM and decision-platform contributor on AI Trading Coach, I connected investment rules, model signals and simulated orders.\n\nI maintain a comic-translate fork, improving its OCR request path and repeated-processing workflow. For a U.S. stock trading simulation, I grouped wallet and holding updates into one transaction. I also self-host services on a personal NAS and OCI.",
     "email": "pjj4678@gmail.com",
@@ -383,8 +383,8 @@
             "title": "IRYA Video Interview Service",
             "subtitle": "Team project, primary frontend contributor",
             "caption": "Kakao Tech Campus team project",
-            "link": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
-            "link_text": "Team GitHub",
+            "link": "https://robinhood0107.github.io/RESUME/portfolio/irya/",
+            "link_text": "Project details",
             "additional_links": [],
             "bullets": [
               "As a primary frontend contributor, connected interview preparation, sessions and review while coordinating and cross-checking with another frontend contributor.",
@@ -506,8 +506,8 @@
             "title": "Kakao Tech Campus",
             "subtitle": "Completed Agentic AI Service Development",
             "caption": "May 18 – Nov 20, 2026",
-            "link": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
-            "link_text": "Team GitHub",
+            "link": "https://robinhood0107.github.io/RESUME/portfolio/irya/",
+            "link_text": "Project details",
             "additional_links": [],
             "bullets": [
               "Completed the Agentic AI Service Development program and received a certificate of completion."
@@ -520,7 +520,7 @@
         "title": "Education",
         "entries": [
           {
-            "title": "Pusan National University",
+            "title": "University",
             "subtitle": "Computer Science and Engineering",
             "caption": "Expected graduation: Feb 2027",
             "link": "",

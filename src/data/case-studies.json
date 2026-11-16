@@ -265,11 +265,8 @@
       "LiveKit"
     ],
     "links": {
-      "github": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
       "caseStudy": "/portfolio/irya/",
-      "live": "https://irya.cloud/",
-      "presentation": "https://irya.cloud/presentation/",
-      "introduction": "https://elice-track.notion.site/1-Polyphemus-4132bb984257808e976af302aa1d6367?pvs=74"
+      "live": "https://irya.cloud/"
     },
     "sections": [
       {
@@ -294,14 +291,6 @@
                 "height": 889,
                 "title": "면접 생성 입력 화면",
                 "caption": "면접 생성 입력 화면"
-              },
-              {
-                "src": "/portfolio-media/irya/visible-presentation.png",
-                "alt": "발표 페이지",
-                "width": 816,
-                "height": 889,
-                "title": "발표 페이지",
-                "caption": "발표 페이지"
               }
             ]
           },
@@ -619,35 +608,8 @@
             "kind": "references",
             "items": [
               {
-                "label": "프로젝트 README와 소스",
-                "href": "https://github.com/kakaotechcampus-4/ktc4-pusan-1"
-              }
-            ]
-          },
-          {
-            "kind": "references",
-            "items": [
-              {
                 "label": "TypeScript Handbook: erased types",
                 "href": "https://www.typescriptlang.org/docs/handbook/2/basic-types.html#erased-types"
-              }
-            ]
-          },
-          {
-            "kind": "references",
-            "items": [
-              {
-                "label": "기기 점검 코드 분리 PR",
-                "href": "https://github.com/kakaotechcampus-4/ktc4-pusan-1/pull/51"
-              }
-            ]
-          },
-          {
-            "kind": "references",
-            "items": [
-              {
-                "label": "IRYA 프로젝트 소개",
-                "href": "https://elice-track.notion.site/1-Polyphemus-4132bb984257808e976af302aa1d6367?pvs=74"
               }
             ]
           }
@@ -742,22 +704,6 @@
         "blocks": [
           {
             "kind": "video",
-            "title": "서비스 시연 영상",
-            "description": "서비스 시연 영상입니다.",
-            "poster": "/portfolio-media/irya/77ecf396eb9af8be26da-poster.png",
-            "sources": [
-              {
-                "src": "/portfolio-media/irya/77ecf396eb9af8be26da.mp4",
-                "type": "video/mp4"
-              },
-              {
-                "src": "/portfolio-media/irya/77ecf396eb9af8be26da-compat-vp8.webm",
-                "type": "video/webm"
-              }
-            ]
-          },
-          {
-            "kind": "video",
             "title": "사용자 인터뷰 발표 영상",
             "description": "발표 자료에 포함된 영상입니다. 당시의 기획 및 시연 화면을 보여줍니다.",
             "poster": "/portfolio-media/irya/0fc43e70a4e06067dc44-poster.png",
@@ -801,24 +747,6 @@
               {
                 "src": "/portfolio-media/irya/23a339c0b1bd12da101f-compat-vp8.webm",
                 "type": "video/webm"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "heading": "발표 자료",
-        "blocks": [
-          {
-            "kind": "text",
-            "text": "프로젝트 발표 사이트에서 당시의 기획과 시연 자료를 확인할 수 있습니다."
-          },
-          {
-            "kind": "references",
-            "items": [
-              {
-                "label": "IRYA 발표 사이트 열기",
-                "href": "https://irya.cloud/presentation/"
               }
             ]
           }
@@ -2278,14 +2206,6 @@
                 "height": 1280,
                 "title": "진단 결과와 팔레트",
                 "caption": "진단 결과와 컬러 팔레트"
-              },
-              {
-                "src": "/images/oliveme/map.png",
-                "alt": "oliveme Map 화면",
-                "width": 720,
-                "height": 1280,
-                "title": "Map",
-                "caption": "주변 매장 화면"
               }
             ]
           }
@@ -2626,30 +2546,6 @@
             "layout": "wide",
             "items": [
               {
-                "src": "/images/madcamp-stock/dashboard-1.png",
-                "alt": "madcamp-stock Dashboard 화면",
-                "width": 2874,
-                "height": 1504,
-                "title": "Dashboard",
-                "caption": "Dashboard 화면"
-              },
-              {
-                "src": "/images/madcamp-stock/dashboard-2.png",
-                "alt": "madcamp-stock 주문, 포트폴리오 화면",
-                "width": 2874,
-                "height": 1504,
-                "title": "주문, 포트폴리오",
-                "caption": "주문, 포트폴리오 화면"
-              },
-              {
-                "src": "/images/madcamp-stock/trade.png",
-                "alt": "주술사, 미국주식 모의투자 종목 차트와 주문창",
-                "width": 2194,
-                "height": 1292,
-                "title": "종목 차트와 주문창",
-                "caption": "종목 차트와 주문창 화면"
-              },
-              {
                 "src": "/portfolio-media/madcamp-stock/system-architecture.png",
                 "alt": "서비스 구성도 화면",
                 "width": 1814,
@@ -2978,12 +2874,12 @@
       }
     ],
     "cover": {
-      "src": "/images/madcamp-stock/dashboard-1.png",
-      "alt": "madcamp-stock Dashboard 화면",
-      "width": 2874,
-      "height": 1504,
-      "title": "Dashboard",
-      "caption": "Dashboard 화면"
+      "src": "/portfolio-media/madcamp-stock/system-architecture.png",
+      "alt": "서비스 구성도 화면",
+      "width": 1814,
+      "height": 1072,
+      "title": "서비스 구성도",
+      "caption": "클라이언트, 서버와 데이터 저장소 구성"
     }
   },
   {

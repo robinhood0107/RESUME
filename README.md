@@ -1,4 +1,4 @@
-# 박종진 · Portfolio & Resume
+# Developer Portfolio & Resume
 
 Next.js·TypeScript·Tailwind CSS 기반 개인 사이트와 Typst 한국어·영어 PDF입니다.
 

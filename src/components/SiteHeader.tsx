@@ -11,7 +11,7 @@ const navItems = [
 
 export default function SiteHeader() {
   // trailingSlash: true 이므로 pathname은 "/resume/" 형태로 들어온다.
-  const pathname = usePathname().replace(/\/?$/, "/");
+  const pathname = (usePathname() ?? "/").replace(/\/?$/, "/");
 
   return (
     <header className="no-print border-b border-rule">

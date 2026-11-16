@@ -1,10 +1,11 @@
 import resume from "./resume.json";
 import { caseStudies } from "./caseStudies";
+import { SITE_URL } from "./profile";
 
 const entries = resume.ko.sections.find((section) => section.id === "projects")!.entries;
 
 export const resumeProjects = entries.map((entry) => {
-  const study = caseStudies.find((study) => study.links?.github === entry.link)!;
+  const study = caseStudies.find((study) => study.links?.github === entry.link || `${SITE_URL}${study.links?.caseStudy}` === entry.link)!;
   return {
     name: study.name,
     role: entry.subtitle,

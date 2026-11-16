@@ -68,7 +68,9 @@ test("웹 이력서는 프로젝트를 마지막에 표시하고 발표 자료�
   assert.match(lookup, /slug === "prompt-airlock-webslide" \? "prompt-airlock"/);
   const irya = studies.find(study => study.slug === "irya");
   assert.equal(irya.links.live, "https://irya.cloud/");
-  assert.ok(irya.links.presentation && irya.links.introduction);
+  assert.equal(irya.links.presentation, undefined);
+  assert.equal(irya.links.introduction, undefined);
+  assert.equal(irya.links.github, undefined);
 });
 
 test("학습 기록은 공개 출처 또는 존재하는 내부 사례로 연결된다", () => {
@@ -155,7 +157,7 @@ test("모든 화면 자산이 실제 파일에 연결된다", () => {
 
 test("이력서의 모든 프로젝트가 상세 페이지로 연결된다", () => {
   for (const entry of resume.ko.sections.find(s => s.id === "projects").entries) {
-    assert.ok(studies.find(s => s.links.github === entry.link), entry.title);
+    assert.ok(studies.find(s => s.links.github === entry.link || `https://robinhood0107.github.io/RESUME${s.links.caseStudy}` === entry.link), entry.title);
   }
 });
 
@@ -234,4 +236,13 @@ test("동영상 자산은 MP4와 WebM 대체본 및 설명을 포함한다", () 
       }
     }
   }
+});
+
+
+test("공개 이력서의 한영 이름과 교육기관은 비식별 표기다", () => {
+  assert.equal(resume.ko.name, "개발 포트폴리오");
+  assert.equal(resume.en.name, "Developer Portfolio");
+  assert.equal(resume.ko.sections.find(s => s.id === "education").entries[0].title, "대학교");
+  assert.equal(resume.en.sections.find(s => s.id === "education").entries[0].title, "University");
+  assert.ok(studies.some(study => study.sections.some(section => section.blocks.some(block => block.kind === "video"))));
 });

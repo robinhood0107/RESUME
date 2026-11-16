@@ -48,7 +48,7 @@ test("각 포트폴리오 카드에 상세 경로와 대표 이미지가 있다"
 test("웹 이력서는 프로젝트를 마지막에 표시하고 발표 자료를 데모로 표시하지 않는다", () => {
   const resumePage = readFileSync(new URL("../src/app/resume/page.tsx", import.meta.url), "utf8");
   const headings = [...resumePage.matchAll(/<SectionHeading index="\d+">([^<]+)<\/SectionHeading>/g)].map(match => match[1]);
-  assert.deepEqual(headings, ["Profile", "Skills", "Experience", "Education", "Activities", "Projects"]);
+  assert.deepEqual(headings, ["Profile", "Skills", "Experience", "Activities", "Projects"]);
   const airlock = studies.find(study => study.slug === "prompt-airlock");
   assert.ok(airlock.links.presentation);
   assert.equal(airlock.links.live, undefined);
@@ -239,10 +239,10 @@ test("동영상 자산은 MP4와 WebM 대체본 및 설명을 포함한다", () 
 });
 
 
-test("공개 이력서의 한영 이름과 교육기관은 비식별 표기다", () => {
+test("공개 이력서는 비식별 이름을 쓰고 학력 항목을 노출하지 않는다", () => {
   assert.equal(resume.ko.name, "개발 포트폴리오");
   assert.equal(resume.en.name, "Developer Portfolio");
-  assert.equal(resume.ko.sections.find(s => s.id === "education").entries[0].title, "대학교");
-  assert.equal(resume.en.sections.find(s => s.id === "education").entries[0].title, "University");
+  assert.equal(resume.ko.sections.some(s => s.id === "education"), false);
+  assert.equal(resume.en.sections.some(s => s.id === "education"), false);
   assert.ok(studies.some(study => study.sections.some(section => section.blocks.some(block => block.kind === "video"))));
 });

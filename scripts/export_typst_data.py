@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "src" / "data" / "resume.json"
 OUTPUT = ROOT / "pdf" / "generated"
-PDF_SECTION_ORDER = ("projects", "skills", "experience", "education", "external_activities")
+PDF_SECTION_ORDER = ("projects", "skills", "experience", "external_activities")
 FORBIDDEN = re.compile(
     r"(?i)(private-reference|sources_private|[A-Za-z]:\\|/mnt/c/|/home/|"
     r"성적|평점|석차|병역|GPA|class rank|military service|"

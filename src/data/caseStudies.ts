@@ -87,7 +87,7 @@ export function caseStudySummary(study: CaseStudy) {
 
   return {
     overview: overview?.kind === "text" ? overview.text : "",
-    results: results?.kind === "metrics" ? results.items.slice(0, 3) : [],
+    results: results?.kind === "metrics" ? results.items.slice(0, 4) : [],
   };
 }
 

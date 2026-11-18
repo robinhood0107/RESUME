@@ -335,6 +335,15 @@ export function ProjectHeader({
   );
 }
 
+const sectionLabels: Record<string, string> = {
+  Overview: "프로그램 소개",
+  Problem: "만든 이유",
+  Product: "작동 원리",
+  "System Architecture": "구성 요소와 연결",
+  Development: "내가 맡은 부분",
+  Results: "확인한 결과",
+};
+
 export default function CaseStudy({ study }: { study: CaseStudyType }) {
   const cover = study.cover?.src.endsWith("/architecture.svg") ? undefined : study.cover;
   const media = study.sections
@@ -354,7 +363,7 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
         {study.sections.filter((section) => section.heading !== "화면과 시연").map((section) => (
           <section key={section.heading} className="print-keep">
             <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">
-              {section.heading}
+              {sectionLabels[section.heading] ?? section.heading}
             </h2>
             <div className="space-y-4">
               {section.blocks.map((block, i) => <BlockView key={i} block={block} />)}

@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import PrintButton from "@/components/PrintButton";
-import ProjectLinks from "@/components/ProjectLinks";
 import { Metrics, ProjectHeader } from "@/components/CaseStudy";
-import { caseStudies, caseStudySummary } from "@/data/caseStudies";
-import { ogBase, profile, SITE_URL } from "@/data/profile";
+import { caseStudies } from "@/data/caseStudies";
+import { assetPath, ogBase, SITE_URL } from "@/data/profile";
 
 export const metadata: Metadata = {
   title: "Portfolio",
   alternates: { canonical: `${SITE_URL}/portfolio/` },
   openGraph: { ...ogBase, url: `${SITE_URL}/portfolio/` },
   twitter: { card: "summary" },
-  description: `${profile.name}의 포트폴리오 — 백엔드, AI 응용, 모바일, FPGA 프로젝트의 문제와 해결 과정을 기록합니다.`,
+  description: "개발 포트폴리오. 프로젝트의 목적, 문제 정의, 역할, 기술, 전체 아키텍처와 결과를 소개합니다.",
 };
 
 export default function PortfolioPage() {
@@ -28,31 +29,38 @@ export default function PortfolioPage() {
       </header>
 
 
-      {/* ---------------------------------------------------------- projects */}
-      <section className="mt-12">
+      <nav aria-label="프로젝트 바로가기" className="no-print mt-8 border-y border-rule py-4">
+        <ul className="flex flex-wrap gap-x-5 gap-y-3 text-[13px] text-muted">
+          {caseStudies.map((study) => <li key={study.slug}><a href={`#${study.slug}`} className="hover:text-accent hover:underline">{study.index} {study.name}</a></li>)}
+        </ul>
+      </nav>
+
+      <section className="mt-12" aria-label="대표 프로젝트 소개">
         <div className="space-y-16 print:space-y-10">
           {caseStudies.map((study) => {
-            const { overview, results } = caseStudySummary(study);
+            const overview = study.sections.find((section) => section.heading === "Overview")?.blocks.find((block) => block.kind === "text");
             const result = study.sections.find((section) => section.heading === "Results")?.blocks.find((block) => block.kind === "text");
+            const metrics = study.sections.find((section) => section.heading === "Results")?.blocks.find((block) => block.kind === "metrics");
 
             return (
-              <article key={study.slug} className="print-keep border-t border-ink pt-8">
-                <ProjectHeader study={study} />
-                <p className="mt-8 text-[15px] leading-[1.8] print:mt-5 print:text-[10pt]">
-                  {overview}
-                </p>
-
-                {result?.kind === "text" && (
-                  <p className="mt-4 text-[14px] leading-[1.75] text-muted">{result.text}</p>
-                )}
-
-                {results.length > 0 && <div className="mt-5"><Metrics items={results} /></div>}
-
-                {study.links && (
-                  <div className="mt-6">
-                    <ProjectLinks links={study.links} />
-                  </div>
-                )}
+              <article id={study.slug} key={study.slug} className="print-section scroll-mt-8 border-t border-ink pt-8">
+                <Link href={`/portfolio/${study.slug}/`} aria-label={`${study.name} 자세히 보기`} className="group block">
+                  <ProjectHeader study={study} />
+                  {overview?.kind === "text" && <p className="mt-8 text-[15px] leading-[1.8]">{overview.text}</p>}
+                  {result?.kind === "text" && <p className="mt-4 text-[14px] leading-[1.75] text-muted">{result.text}</p>}
+                  {metrics?.kind === "metrics" && <div className="mt-5"><Metrics items={metrics.items.slice(0, 4)} /></div>}
+                  {study.cover && (
+                    <Image
+                      src={assetPath(study.cover.src)}
+                      alt={study.cover.alt}
+                      width={study.cover.width}
+                      height={study.cover.height}
+                      sizes="(max-width: 860px) 100vw, 860px"
+                      className="mt-6 h-auto max-h-[360px] w-full border border-rule object-contain"
+                    />
+                  )}
+                  <span className="mt-5 inline-block text-[14px] text-accent underline underline-offset-4 group-hover:decoration-2">자세히 보기 →</span>
+                </Link>
               </article>
             );
           })}

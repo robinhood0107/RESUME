@@ -3,6 +3,7 @@ import resume from "./resume.json";
 export const BASE_PATH = "/RESUME";
 export const SITE_ORIGIN = "https://robinhood0107.github.io";
 export const SITE_URL = `${SITE_ORIGIN}${BASE_PATH}`;
+export const SITE_NAME = "Developer Portfolio";
 export const GITHUB_URL = resume.ko.github;
 export const assetPath = (path: string) => `${BASE_PATH}${path}`;
 
@@ -43,4 +44,4 @@ export const profile = {
   },
 };
 
-export const ogBase = { type: "website", locale: "ko_KR", siteName: `${profile.name} | ${profile.role}` } as const;
+export const ogBase = { type: "website", locale: "ko_KR", siteName: SITE_NAME } as const;

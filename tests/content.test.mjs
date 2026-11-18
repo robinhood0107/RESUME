@@ -15,7 +15,7 @@ test("각 프로젝트의 상세 경로와 공개 링크가 고유하고 유효�
   for (const study of studies) {
     assert.match(study.slug, /^[a-z0-9-]+$/);
     assert.equal(study.links.caseStudy, `/portfolio/${study.slug}/`);
-    const external = Object.entries(study.links).filter(([key]) => key !== "caseStudy");
+    const external = Object.entries(study.links).filter(([key]) => !["caseStudy", "demo"].includes(key));
     assert.ok(external.length > 0, study.slug);
     for (const [key, value] of external) {
       const url = new URL(value);
@@ -23,12 +23,15 @@ test("각 프로젝트의 상세 경로와 공개 링크가 고유하고 유효�
       if (key === "github") assert.equal(url.hostname, "github.com", study.slug);
     }
     if (study.links.live) assert.notEqual(study.links.live, study.links.presentation, study.slug);
-    assert.deepEqual(study.sections.slice(0, 6).map(section => section.heading), [
-      "Overview", "Problem", "Product", "System Architecture", "Development", "Results",
+    assert.deepEqual(study.sections.slice(0, 7).map(section => section.heading), [
+      "Overview", "Problem", "Product", "System Architecture", "Design Decisions", "Development", "Results",
     ]);
     assert.ok(study.sections.find(section => section.heading === "Product").blocks[0].items.length >= 3);
     assert.ok(study.sections.find(section => section.heading === "Development").blocks[0].text);
     assert.ok(study.sections.find(section => section.heading === "Results").blocks[0].text);
+    assert.ok(study.sections.find(section => section.heading === "Design Decisions").blocks[0].items.every(item => item.title && item.text));
+    const hasVideo = study.sections.some(section => section.blocks.some(block => block.kind === "video"));
+    assert.equal(study.links.demo, hasVideo ? `/portfolio/${study.slug}/#demo` : undefined);
     assert.equal(new Set(study.sections.map(s => s.heading)).size, study.sections.length);
   }
 });
@@ -66,7 +69,7 @@ test("웹 이력서는 프로젝트를 마지막에 표시하고 발표 자료�
   assert.equal(irya.links.live, "https://irya.cloud/");
   assert.equal(irya.links.presentation, undefined);
   assert.equal(irya.links.introduction, undefined);
-  assert.equal(irya.links.github, undefined);
+  assert.equal(irya.links.github, "https://github.com/kakaotechcampus-4/ktc4-pusan-1");
 });
 
 test("학습 기록은 공개 출처 또는 존재하는 내부 사례로 연결된다", () => {
@@ -130,7 +133,7 @@ test("OCR 사례는 편집 화면과 번역 처리 상태 사진만 사용한다
   assert.equal(blocks.filter(block => block.kind === "video").length, 0);
   const component = readFileSync(new URL("../src/components/CaseStudy.tsx", import.meta.url), "utf8");
   assert.match(component, /shot.caption && shot.caption !== shot.title/);
-  assert.match(component, /item.src !== study.cover\?\.src/);
+  assert.match(component, /item.src !== cover\?\.src/);
 });
 
 test("모든 화면 자산이 실제 파일에 연결된다", () => {
@@ -171,7 +174,7 @@ test("날짜 예외와 미디어 경로 제한을 구분한다", () => {
   assert.match("/portfolio-media/project/asset.png", imagePath);
   assert.doesNotMatch("/portfolio-media/../../private.png", imagePath);
 });
-test("동영상과 이미지 묶음이 하위 경로와 대체 링크를 포함해 렌더링된다", async () => {
+test("목록은 소개와 수치, 대표 이미지와 단일 상세 링크를 표시하고 상세는 모든 설명과 미디어를 보존한다", async () => {
   const { default: ts } = await import("typescript");
   const { createRequire } = await import("node:module");
   const { runInNewContext } = await import("node:vm");
@@ -182,13 +185,16 @@ test("동영상과 이미지 묶음이 하위 경로와 대체 링크를 포함�
   const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
   const compiledModule = { exports: {} };
   const imports = {
-    "@/data/profile": { assetPath: path => `/RESUME${path}` },
+    "@/data/profile": { assetPath: path => `/RESUME${path}`, ogBase: {}, SITE_URL: "https://example.com/RESUME" },
     "@/components/ProjectLinks": { __esModule: true, default: () => null },
-    "@/data/caseStudies": { caseStudySummary: () => ({ overview: "요약", results: [] }) },
+    "@/components/PrintButton": { __esModule: true, default: () => null },
+    "@/data/caseStudies": { caseStudies: studies },
     "next/image": { __esModule: true, default: props => createElement("img", props) },
+    "next/link": { __esModule: true, default: props => createElement("a", props) },
   };
   runInNewContext(compiled, { module: compiledModule, exports: compiledModule.exports, require: name => imports[name] ?? require(name) });
-  const study = { index: "1", name: "예시", subtitle: "예시", context: "팀", role: "역할", stack: [], sections: [{ heading: "화면과 시연", blocks: [
+  imports["@/components/CaseStudy"] = compiledModule.exports;
+  const study = { index: "1", name: "예시", subtitle: "예시", context: "팀", role: "역할", stack: [], sections: [{ heading: "Overview", blocks: [{ kind: "text", text: "프로그램 목적" }] }, { heading: "화면과 시연", blocks: [
     { kind: "screens", title: "화면 흐름", layout: "wide", items: [{ src: "/images/example.png", title: "화면", alt: "화면 설명", width: 640, height: 360 }] },
     { kind: "video", title: "시연", description: "시연 내용 설명", poster: "/images/poster.png", sources: [{ src: "/videos/demo.mp4", type: "video/mp4" }, { src: "/videos/demo.webm", type: "video/webm" }], captions: { src: "/videos/demo.vtt", srcLang: "ko", label: "한국어" } },
   ] }] };
@@ -204,16 +210,51 @@ test("동영상과 이미지 묶음이 하위 경로와 대체 링크를 포함�
   assert.match(html, /src="\/RESUME\/videos\/demo.webm" type="video\/webm"/);
   assert.match(html, /kind="captions" src="\/RESUME\/videos\/demo.vtt"/);
   assert.match(html, /시연 내용 설명/);
-  study.sections[0].blocks[1].description = "시연";
+  study.sections[1].blocks[1].description = "시연";
   const noDuplicate = renderToStaticMarkup(createElement(compiledModule.exports.default, { study }));
   assert.equal((noDuplicate.match(/>시연<\/span>/g) || []).length, 1);
   assert.match(html, /href="\/RESUME\/videos\/demo.mp4" download=""/);
+  assert.ok(html.indexOf("프로그램 목적") < html.indexOf('id="demo"'));
+  const withCover = { ...study, cover: study.sections[1].blocks[0].items[0] };
+  const withoutDuplicate = renderToStaticMarkup(createElement(compiledModule.exports.default, { study: withCover }));
+  assert.equal((withoutDuplicate.match(/src="\/RESUME\/images\/example.png"/g) || []).length, 1);
+  assert.doesNotMatch(withoutDuplicate, /<ul[^>]*><\/ul>/);
   const architecture = { src: "/images/example/architecture.svg", title: "구조도", alt: "구조도", width: 640, height: 360 };
   const architectureOnly = { ...study, cover: architecture, sections: [{ heading: "System Architecture", blocks: [{ kind: "screens", layout: "wide", items: [architecture] }] }] };
   const noRepeatedCover = renderToStaticMarkup(createElement(compiledModule.exports.default, { study: architectureOnly }));
   assert.equal((noRepeatedCover.match(/src="\/RESUME\/images\/example\/architecture.svg"/g) || []).length, 1);
   assert.doesNotMatch(noRepeatedCover, /화면과 시연 보기/);
 
+  const listSource = readFileSync(new URL("../src/app/portfolio/page.tsx", import.meta.url), "utf8");
+  const listModule = { exports: {} };
+  const listCode = ts.transpileModule(listSource, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } }).outputText;
+  runInNewContext(listCode, { module: listModule, exports: listModule.exports, require: name => imports[name] ?? require(name) });
+  const list = renderToStaticMarkup(createElement(listModule.exports.default));
+  assert.equal((list.match(/<article/g) || []).length, studies.length);
+  assert.equal((list.match(/<img/g) || []).length, studies.length);
+  assert.doesNotMatch(list, /<video|전체 아키텍처와 설계 이유 →|프로젝트 상세 →/);
+  assert.equal((list.match(/자세히 보기 →/g) || []).length, studies.length);
+  for (const project of studies) {
+    assert.equal(list.split(`href="${project.links.caseStudy}"`).length - 1, 1, project.slug);
+    const overview = project.sections.find(section => section.heading === "Overview").blocks.find(block => block.kind === "text").text;
+    assert.ok(list.includes(renderToStaticMarkup(overview)), `${project.slug}: 목록 소개 누락`);
+    assert.ok(list.includes(renderToStaticMarkup(project.role)), `${project.slug}: 목록 역할 누락`);
+    const result = project.sections.find(section => section.heading === "Results").blocks.find(block => block.kind === "text").text;
+    assert.ok(list.includes(renderToStaticMarkup(result)), `${project.slug}: 기존 결과 설명 누락`);
+    const metrics = project.sections.find(section => section.heading === "Results").blocks.find(block => block.kind === "metrics").items.slice(0, 4);
+    for (const metric of metrics) {
+      assert.ok(list.includes(renderToStaticMarkup(metric.value)), `${project.slug}: 목록 수치 누락`);
+      assert.ok(list.includes(renderToStaticMarkup(metric.label)), `${project.slug}: 수치 조건 누락`);
+    }
+    const detail = renderToStaticMarkup(createElement(compiledModule.exports.default, { study: project }));
+    for (const block of project.sections.flatMap(section => section.blocks)) {
+      const text = block.kind === "text" ? [block.text] : block.kind === "list" ? block.items : block.kind === "cards" ? block.items.map(item => item.text) : [];
+      for (const paragraph of text) assert.ok(detail.includes(renderToStaticMarkup(paragraph)), `${project.slug}: 상세 설명 누락`);
+      if (block.kind === "text" && block.text !== overview && block.text !== result) assert.ok(!list.includes(renderToStaticMarkup(block.text)), `${project.slug}: 목록에 상세 설명 노출`);
+      if (block.kind === "screens") for (const shot of block.items) assert.ok(detail.includes(`/RESUME${shot.src}`), shot.src);
+      if (block.kind === "video") for (const source of block.sources) assert.ok(detail.includes(`/RESUME${source.src}`), source.src);
+    }
+  }
 });
 
 
@@ -240,7 +281,7 @@ test("동영상 자산은 MP4와 WebM 대체본 및 설명을 포함한다", () 
 
 
 test("공개 이력서는 비식별 이름을 쓰고 학력 항목을 노출하지 않는다", () => {
-  assert.equal(resume.ko.name, "개발 포트폴리오");
+  assert.equal(resume.ko.name, "이력서");
   assert.equal(resume.en.name, "Developer Portfolio");
   assert.equal(resume.ko.sections.some(s => s.id === "education"), false);
   assert.equal(resume.en.sections.some(s => s.id === "education"), false);

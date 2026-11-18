@@ -44,6 +44,7 @@ export type ProjectLinks = {
   appStore?: string;
   playStore?: string;
   live?: string;
+  demo?: string;
   presentation?: string;
   introduction?: string;
   github?: string;
@@ -72,24 +73,6 @@ export type CaseStudy = {
 };
 
 export const caseStudies = studies as CaseStudy[];
-
-/**
- * 메인 Portfolio Overview 카드용 요약.
- * 별도 필드로 중복 관리하지 않고 상세 본문의 Overview / Results를 그대로 재사용한다.
- */
-export function caseStudySummary(study: CaseStudy) {
-  const overview = study.sections
-    .find((section) => section.heading === "Overview")
-    ?.blocks.find((block) => block.kind === "text");
-  const results = study.sections
-    .find((section) => section.heading === "Results")
-    ?.blocks.find((block) => block.kind === "metrics");
-
-  return {
-    overview: overview?.kind === "text" ? overview.text : "",
-    results: results?.kind === "metrics" ? results.items.slice(0, 4) : [],
-  };
-}
 
 export function findCaseStudy(slug: string) {
   return caseStudies.find((study) => study.slug === (slug === "prompt-airlock-webslide" ? "prompt-airlock" : slug));

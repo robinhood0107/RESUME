@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/normalize_export_paths.mjs",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "build:pdf": "python3 scripts/export_typst_data.py && uv run --no-project --with-requirements requirements-pdf.txt python scripts/build_pdfs.py",
-    "verify": "node --test tests/content.test.mjs && python3 -m unittest discover -s tests -p \"test_*.py\"",
+    "verify": "node --test tests/content.test.mjs tests/architecture-boundaries.test.mjs tests/export-paths.test.mjs && python3 -m unittest discover -s tests -p \"test_*.py\"",
     "build:all": "npm run build:pdf && npm run build"
   },
   "dependencies": {

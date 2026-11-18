@@ -11,6 +11,7 @@ export type Block =
   | { kind: "video"; title: string; description: string; poster: string; sources: { src: string; type: "video/mp4" | "video/webm" }[]; captions?: { src: string; srcLang: string; label: string } }
   | { kind: "references"; items: { label: string; href: string }[] }
   | { kind: "table"; headers: string[]; rows: string[][] }
+  | { kind: "code"; language: string; code: string }
   | { kind: "diagram"; caption?: string; stages: DiagramStage[] };
 
 /** phone = 세로 앱 스크린샷, wide = 16:9 발표/웹 화면 */
@@ -36,6 +37,12 @@ export type DiagramStage = {
 export type CaseSection = {
   heading: string;
   blocks: Block[];
+};
+
+export type ProjectExplanation = {
+  repository: string;
+  revision: string;
+  sections: CaseSection[];
 };
 
 /** 프로젝트에 연결할 링크. 없는 필드는 생략한다. */

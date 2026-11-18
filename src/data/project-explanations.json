@@ -1,0 +1,2191 @@
+{
+  "prompt-airlock": {
+    "repository": "https://github.com/robinhood0107/PromptAirlock",
+    "revision": "af37ff2b84c59b50aabd8a9cf0b843f43c6d9568",
+    "sections": [
+      {
+        "heading": "전체 구조와 처리 목적",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "PromptAirlock은 외부 AI 요청 앞에서 문서와 메시지를 검사하는 Gateway와 원래 값의 대응표를 관리하는 Vault로 나뉜다. 외부 모델이 개인정보를 알아야만 답할 필요가 없는 요청에서는 이름 등의 값을 가명으로 바꾸고 답변이 돌아오면 같은 요청의 대응표로 복원한다."
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "입력과 출처 확인",
+              "문서 추출과 탐지",
+              "정책 판정",
+              "가명화와 잔여 검사",
+              "provider 호출",
+              "요청 범위에서 복원"
+            ]
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "구성 요소",
+              "입력과 책임",
+              "바깥으로 내보내는 것"
+            ],
+            "rows": [
+              [
+                "Gateway",
+                "HTTP 요청의 형식, 출처와 등급을 확인하고 처리 순서를 연결",
+                "검사 단계를 통과한 provider 요청"
+              ],
+              [
+                "core와 탐지기",
+                "문자열 위치, 정보 종류와 처리 정책을 계산",
+                "정책 판정 또는 명시적인 거절 사유"
+              ],
+              [
+                "추출 runner",
+                "PDF와 한글 문서에서 검사할 글자를 추출",
+                "추출 결과 또는 실패"
+              ],
+              [
+                "Vault",
+                "요청별 가명과 원래 값의 대응 관계를 보관",
+                "해당 범위에서 확인한 가명 또는 복원 값"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "가명화와 암호화는 어떻게 다른가",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "암호화는 키를 사용해 평문을 암호문으로 바꾸는 방식이다. 여기서 쓰는 가명화는 원래 값 대신 대체 표지를 넣고 별도 대응표를 통해 원래 값을 찾는 방식이다. 따라서 가명 문자열만 숨기는 것보다 대응표에 접근할 수 있는 주체와 보관 시간을 제한하는 일이 중요하다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "개념 예시\n원문: 사용자 A에게 안내한다\n외부 요청: [가명 표지]에게 안내한다\n답변 복원: 같은 요청의 대응표에서만 원래 값을 찾는다"
+          },
+          {
+            "kind": "text",
+            "text": "가명화한 글에도 사건의 문맥이나 다른 정보가 남을 수 있다. 이 구조를 익명화의 완료나 법률상 인증으로 설명하지 않는다. 어떤 종류를 가명화하고 어떤 종류를 차단할지는 정보 종류별 정책이 정한다."
+          }
+        ]
+      },
+      {
+        "heading": "상태 타입으로 전송 순서를 제한하는 이유",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Gateway는 RawPrompt를 만든 뒤 탐지와 정책 검사를 거쳐 PolicyCheckedPrompt로 진행한다. protect_and_verify는 가명화한 내용을 다시 검사하고 VerifiedPrompt를 반환한다. provider용 요청을 만드는 함수는 이 검증된 상태를 입력으로 받는다."
+          },
+          {
+            "kind": "text",
+            "text": "서로 다른 단계를 같은 문자열 변수로 취급하면 검사 전 값을 실수로 보내기 쉽다. 단계마다 타입을 나누면 호출 가능한 함수와 필요한 조건을 코드에 드러낼 수 있다. 다만 타입 검사를 통과했다는 사실만으로 탐지기가 모든 개인정보를 찾아냈다는 뜻은 아니다."
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "검사",
+              "확인하는 내용"
+            ],
+            "rows": [
+              [
+                "입구 검사",
+                "JSON 구조, 출처와 허용 등급"
+              ],
+              [
+                "정책 검사",
+                "탐지된 종류별 Pass, Confirm, Tokenize, Block 판정"
+              ],
+              [
+                "잔여 검사",
+                "가명화 후에도 탐지되는 값이 남아 있는지 확인"
+              ],
+              [
+                "provider 경계",
+                "검증된 요청으로 전송 본문을 구성할 수 있는지 확인"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "탐지와 위치 복원이 필요한 이유",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "정규식은 번호 모양을 빠르게 찾지만 주변 문맥에 따라 의미가 달라질 수 있다. 숫자로 된 문서 식별자를 모두 계좌로 보면 정상 문서를 막는다. 반대로 문맥만 요구하면 설명 없이 등장한 실제 번호를 놓칠 수 있어 종류별 형식, 문맥과 처리 기준을 함께 봐야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "문자를 정규화하거나 인코딩을 풀어 검사하면 탐지 위치와 원래 문서의 위치가 달라질 수 있다. 위치 역매핑은 변환된 문자열에서 찾은 구간을 원래 입력의 구간으로 연결하는 과정이다. 잘못된 범위를 지우거나 일부 글자만 남기지 않도록 하는 데 필요하다."
+          },
+          {
+            "kind": "text",
+            "text": "NER은 문맥을 보고 사람명과 조직명 같은 개체를 찾는 모델이다. 패턴 검사와 다른 단서를 제공하지만 모델의 출력도 오류가 있을 수 있다. 정보 종류와 탐지 방법을 구분해 결과를 모으고 겹친 구간의 정책은 더 엄격한 쪽으로 합친다."
+          }
+        ]
+      },
+      {
+        "heading": "Vault의 요청 범위와 세대",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Gateway는 요청마다 scope를 열고 응답 복원까지 마치면 닫는다. TTL은 처리 후에도 남은 범위가 무한히 유지되지 않게 하는 만료 상한이다. 세션 전체의 대응표를 오래 보관하는 대신, 다중 턴 요청도 그 요청에 들어온 메시지를 다시 검사한다."
+          },
+          {
+            "kind": "text",
+            "text": "Vault를 다시 시작하면 이전 프로세스의 대응표를 새 프로세스의 대응표처럼 사용해서는 안 된다. generation은 이 프로세스 수명을 구분하는 값이다. 이전 세대의 범위가 필요한 진행 중 응답은 복원을 거절하고 새 요청은 새 세대에서 시작한다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "요청 A의 표지 → 요청 A의 scope에서 조회\n요청 B의 표지 → 요청 A에서 사용하지 않음\nVault 재시작 → 이전 generation의 복원 거절\nscope 정리 실패 → TTL이 남은 보관 시간을 제한"
+          }
+        ]
+      },
+      {
+        "heading": "Named Pipe와 Unix domain socket",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Gateway와 Vault는 같은 컴퓨터 안의 별도 프로세스다. Windows에서는 Named Pipe를, Linux에서는 Unix domain socket을 사용한다. 두 방식 모두 OS의 계정 권한과 프로세스 신원 확인을 적용할 수 있다. 단순히 localhost 주소를 쓴다고 상대 프로세스의 신원이 자동으로 확인되는 것은 아니다."
+          },
+          {
+            "kind": "text",
+            "text": "통신 메시지는 Protobuf로 직렬화한다. 메시지 앞의 길이 값은 이번 메시지가 어디에서 끝나는지 알려주는 framing이다. 버전, 길이와 요청 식별자를 확인해 잘린 메시지나 다른 요청의 응답을 그대로 해석하지 않는다. 연결 오류나 형식 오류가 난 연결은 재사용하지 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "별도 프로세스는 대응표를 다루는 경계를 분리하지만 통신과 장애 처리가 추가된다. 메모리를 지우는 처리도 커널 버퍼, 레지스터나 강제 종료 시점의 모든 사본까지 없앴다는 보장은 아니다."
+          }
+        ]
+      },
+      {
+        "heading": "문서 추출 실패와 provider 호출",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "문서 추출은 외부 입력을 해석하는 작업이므로 본문 검사와 별도의 실패 경계가 필요하다. 추출 runner에서 문서를 읽지 못했을 때 원래 파일을 그대로 provider에 보내는 대안을 사용하지 않는다. 추출할 수 있는 텍스트와 처리 가능한 입력인지 먼저 확인한다."
+          },
+          {
+            "kind": "text",
+            "text": "동기 탐지와 Vault 작업은 작업 풀에서 실행하고 provider의 네트워크 대기는 별도의 비동기 실행 흐름으로 다룬다. 비동기는 작업이 끝났다는 뜻이 아니라 대기 중 실행 자원을 다른 작업에 사용할 수 있게 하는 방식이다. 취소되면 전송 연결과 가명 범위 정리도 함께 고려해야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "확인 요청과 감사 기록",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "정책에는 차단과 가명화 외에 사람이 전송을 확인해야 하는 Confirm 상태가 있다. 확인 표지는 본문 hash와 연결해 다른 내용의 요청에 재사용되지 않도록 검사한다. 확인이 필요한 내용을 바꾸면 같은 표지를 계속 유효하게 취급할 수 없다."
+          },
+          {
+            "kind": "text",
+            "text": "감사 기록은 판단 사유를 남기는 기록과 실제 전송 본문을 남기는 기록을 구분해 봐야 한다. 코드의 egress 기록은 provider로 보낼 본문을 대상으로 하며 기록에 실패하면 전송을 중단한다. 전송 본문을 보관하는 정책과 대응표 보관 정책은 서로 다른 경계다."
+          }
+        ]
+      },
+      {
+        "heading": "검증 수치를 읽는 방법",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "정상 문서를 잘못 차단한 비율은 정상 표본 중 불필요하게 막힌 문서의 비율이다. 민감한 문서를 놓친 비율과 함께 봐야 탐지 정책의 비용을 이해할 수 있다. 정상 합성 문서의 오차단 감소를 실제 기관의 정보 유출 감소율로 바꿀 수는 없다."
+          },
+          {
+            "kind": "text",
+            "text": "문서 추출 성공, 프로세스 비정상 종료와 Vault 왕복 지연은 서로 다른 측정이다. 같은 입력과 버전, 통계 기준에서 비교해야 하며 빠른 IPC 연산이 전체 문서 처리 시간을 대표하지도 않는다. 구현된 경계, 테스트의 조건과 실제 외부 서비스 운영은 구분한다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "include/prompt_airlock/core/types.hpp",
+                "href": "https://github.com/robinhood0107/PromptAirlock/blob/af37ff2b84c59b50aabd8a9cf0b843f43c6d9568/include/prompt_airlock/core/types.hpp"
+              },
+              {
+                "label": "include/prompt_airlock/gateway/pipeline.hpp",
+                "href": "https://github.com/robinhood0107/PromptAirlock/blob/af37ff2b84c59b50aabd8a9cf0b843f43c6d9568/include/prompt_airlock/gateway/pipeline.hpp"
+              },
+              {
+                "label": "src/gateway/pipeline.cpp",
+                "href": "https://github.com/robinhood0107/PromptAirlock/blob/af37ff2b84c59b50aabd8a9cf0b843f43c6d9568/src/gateway/pipeline.cpp"
+              },
+              {
+                "label": "docs/adr/0003-vault-ipc.md",
+                "href": "https://github.com/robinhood0107/PromptAirlock/blob/af37ff2b84c59b50aabd8a9cf0b843f43c6d9568/docs/adr/0003-vault-ipc.md"
+              },
+              {
+                "label": "docs/adr/0019-vault-connection.md",
+                "href": "https://github.com/robinhood0107/PromptAirlock/blob/af37ff2b84c59b50aabd8a9cf0b843f43c6d9568/docs/adr/0019-vault-connection.md"
+              },
+              {
+                "label": "include/prompt_airlock/extract/runner.hpp",
+                "href": "https://github.com/robinhood0107/PromptAirlock/blob/af37ff2b84c59b50aabd8a9cf0b843f43c6d9568/include/prompt_airlock/extract/runner.hpp"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "irya": {
+    "repository": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
+    "revision": "34d60b434b3785209169892e8ddb731fa4128cbf",
+    "sections": [
+      {
+        "heading": "한 면접 기록을 만드는 전체 흐름",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "IRYA는 화상 통화 자체와 그 통화에서 생기는 자료를 함께 다룬다. 면접관과 지원자는 같은 방에 입장하고 음성과 영상은 미디어 경로로 흐른다. 메모, 전사와 분석 결과는 같은 세션의 기록으로 연결돼 면접 이후에도 원래 발언 시점을 찾아볼 수 있다."
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "자료와 면접 생성",
+              "동의와 입장",
+              "화상 통화와 전사",
+              "메모 및 후속 질문",
+              "면접 후 분석",
+              "사람의 검토와 리포트"
+            ]
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "구성",
+              "책임"
+            ],
+            "rows": [
+              [
+                "React와 TypeScript",
+                "면접실, 메모, 검토 화면과 저장 상태 표시"
+              ],
+              [
+                "FastAPI와 PostgreSQL",
+                "면접 및 세션 API, 소유 범위, 메모와 전사, 분석 상태 저장"
+              ],
+              [
+                "LiveKit과 Egress",
+                "실시간 미디어 전달과 트랙 녹화"
+              ],
+              [
+                "방 워커와 폴러",
+                "실시간 전사 및 제안, 면접 전후의 분석 작업"
+              ],
+              [
+                "S3와 CloudFront",
+                "녹화 파일 보관과 제한된 재생 주소 제공"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "API 연결과 미디어 연결을 나누는 이유",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "HTTP API는 면접을 만들고 상태를 바꾸는 요청에 적합하다. 실시간 음성과 영상은 연속적인 미디어 스트림이므로 별도의 전송 경로가 필요하다. 브라우저는 세션과 입장 토큰을 API에서 받고 통화 미디어는 WebRTC로 LiveKit에 연결한다."
+          },
+          {
+            "kind": "text",
+            "text": "LiveKit의 room은 통화 공간, participant는 참가자, track은 공개하거나 구독하는 음성 및 영상 흐름이다. 서버가 파일 한 개를 받아 순서대로 돌려주는 구조와 다르다. 음성 전사나 AI 분석 실패를 통화의 실패와 분리하려는 설계이지만 실제 장애별 지속 동작은 각 경로에서 따로 확인해야 한다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "LiveKit의 room, participant와 track",
+                "href": "https://docs.livekit.io/intro/basics/rooms-participants-tracks/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "메모 자동저장과 오래된 응답",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "화면의 입력 상태와 서버에 저장된 상태는 동시에 바뀌지 않는다. 사용자가 계속 쓰는 동안 이전 저장 요청이 끝날 수 있으므로 응답이 왔다고 현재 입력 전체를 저장 완료로 표시하면 안 된다. 메모 큐는 입력 버전과 저장된 버전을 구분하고 면접별 쓰기 요청을 직렬화한다."
+          },
+          {
+            "kind": "text",
+            "text": "직렬화는 이 브라우저 안의 요청 순서를 다루는 장치다. 다른 탭이나 다른 화면의 요청까지 막아 주지는 않는다. 그래서 클라이언트의 순서 관리와 서버의 저장 충돌 검사가 둘 다 필요하다. 로그인 토큰이 바뀌면 이전 사용자에게 속한 큐와 초안도 정리한다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "입력 버전 3을 저장 요청\n대기 중 사용자가 버전 4까지 작성\n버전 3의 응답 도착 → 3만 저장 완료로 기록\n버전 4는 미저장 상태로 남겨 다음 요청에서 처리"
+          }
+        ]
+      },
+      {
+        "heading": "expectedMemo를 이용한 조건부 저장",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "expectedMemo는 사용자가 마지막으로 읽은 서버 메모다. 서버는 새 메모를 쓰기 전에 DB의 현재 메모가 이 기준값과 같은지를 UPDATE 조건에서 확인한다. 조회한 뒤 나중에 무조건 저장하는 방식과 달리 비교와 쓰기가 같은 SQL 문장에 들어간다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "개념 예시\nA와 B가 같은 메모를 읽음\nA: 현재 메모가 읽은 값과 같으면 새 값으로 저장\nB: 이미 A가 바꿨으므로 조건 불일치 → 충돌\nB의 초안은 남기고 최신 내용을 확인한 뒤 다시 적용"
+          },
+          {
+            "kind": "text",
+            "text": "이것은 낙관적 동시성 제어의 한 형태다. 다른 수정이 드물다고 가정하고 실제 충돌이 확인되면 조정한다. 문자열의 동일성을 기준으로 하므로 숫자 버전이나 이벤트 이력과는 구분되며 클라이언트가 기준값 없이 요청하는 경로도 별도로 봐야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "초안 복구와 저장 완료의 구분",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "서버 저장에 실패해도 작성 중인 글을 지우지 않는다. 메모 큐는 failed와 conflict를 구분하고 로컬 초안에는 작성 내용과 당시 서버 기준값을 함께 보관한다. 새로고침 뒤 기준값이 달라졌다면 자동으로 최신 서버 내용을 덮기보다 충돌 검토를 거친다."
+          },
+          {
+            "kind": "text",
+            "text": "로컬 초안은 서버의 최종 기록이 아니다. 서버 응답과 후속 조회가 저장 여부의 기준이며 다른 기기와 자동 동기화되는 기능도 아니다. 사용자가 서버 내용을 확인한 뒤 재적용하는 동작에서는 그 시점의 값을 새 비교 기준으로 사용한다."
+          }
+        ]
+      },
+      {
+        "heading": "전사와 AI 근거 연결",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "STT는 음성을 문자로 바꾸는 처리다. 전사에는 발화자와 시간 정보가 붙어 있어 녹화의 어느 구간에서 나온 말인지 연결할 수 있다. 실시간 자막과 면접 후 분석에 사용하는 확정 전사는 같은 단계의 산출물로 취급하지 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "AI가 만든 finding에는 인용문과 인용한 발화의 식별자가 붙는다. grounding 코드는 Unicode NFC 정규화와 공백 정리 후 인용문이 해당 발화에 실제로 포함되는지 검사하고 시간 위치를 원문에 연결한다. 다른 발화에서만 발견된 문장을 그 발화의 근거로 승인하지 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "문자열에 실제로 존재한다는 검사는 의미를 제대로 요약했는지까지 보장하지 않는다. 근거 없는 GAP 유형처럼 인용이 필수인 항목과 규칙이 다른 경우도 있다. 최종 채택과 검토는 사람이 담당한다."
+          }
+        ]
+      },
+      {
+        "heading": "작업 큐와 상태 전이",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "면접 전 준비와 면접 후 분석은 응답 시간이 길 수 있어 API 요청과 별도 작업으로 나눈다. PostgreSQL에 저장된 작업 상태를 폴러가 조회하고 결과를 API에 돌려준다. 현재 backend의 분석 작업 큐를 Valkey 큐로 설명하면 코드와 맞지 않는다."
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "처리 경로",
+              "구분해야 할 상태"
+            ],
+            "rows": [
+              [
+                "면접 API",
+                "생성, 동의, 입장과 종료"
+              ],
+              [
+                "분석 작업",
+                "처리 중, 완료 또는 실패"
+              ],
+              [
+                "검토",
+                "사람이 항목을 채택하거나 기각하고 확정"
+              ],
+              [
+                "녹화",
+                "트랙 저장과 합친 파일 준비 및 재생 가능 상태"
+              ]
+            ]
+          },
+          {
+            "kind": "text",
+            "text": "Valkey는 LiveKit과 Egress의 연결에 쓰인다. 같은 배포에 Redis 계열 컨테이너가 있다는 이유로 모든 비동기 작업이 그 저장소를 거친다고 볼 수는 없다. 재시도는 이미 완료된 결과와 진행 상태를 구분해 중복 결과를 만들지 않도록 검토해야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "녹화 파일과 시간 좌표",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "TrackEgress는 참가자의 개별 트랙을 파일로 내보내는 경로다. 저장된 트랙을 합친 영상과 전사의 시간 원점이 다를 수 있으므로 offsetMs 같은 보정 정보가 필요하다. 인용문의 시간과 재생기의 시간을 그대로 같은 숫자로 취급하면 다른 장면으로 이동할 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "녹화 파일의 저장소와 브라우저가 쓰는 재생 URL도 구분한다. 제한된 유효기간의 서명 URL은 링크의 사용 범위를 제어하는 장치이며 파일이 영구 삭제되거나 모든 복사본이 회수됐다는 뜻은 아니다. 소유 범위 확인과 파일 보관 및 삭제 절차를 함께 봐야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "배포 경계와 검증",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "배포 구성은 프론트 정적 파일, API, DB, 미디어 서버, 녹화와 분석 워커를 나눈다. Caddy의 HTTP 경로와 WebRTC 미디어 경로는 다르다. 컨테이너가 실행된 상태, API가 준비된 상태와 실제 통화가 가능한 상태도 각각 확인해야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "메모 저장 계층의 사후 재현은 그 입력과 DB 경계에서의 비교다. 특정 화면 청크의 크기 감소는 해당 묶음의 빌드 결과이며 통화 지연이나 전체 페이지 속도의 같은 비율 개선을 뜻하지 않는다. UI 상태, 저장 API, DB 충돌과 실제 미디어는 각기 다른 검증 대상이다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "infra/docker-compose.yml",
+                "href": "https://github.com/kakaotechcampus-4/ktc4-pusan-1/blob/34d60b434b3785209169892e8ddb731fa4128cbf/infra/docker-compose.yml"
+              },
+              {
+                "label": "backend/app/infra/postgres.py",
+                "href": "https://github.com/kakaotechcampus-4/ktc4-pusan-1/blob/34d60b434b3785209169892e8ddb731fa4128cbf/backend/app/infra/postgres.py"
+              },
+              {
+                "label": "frontend/src/hooks/useMemoAutosave.ts",
+                "href": "https://github.com/kakaotechcampus-4/ktc4-pusan-1/blob/34d60b434b3785209169892e8ddb731fa4128cbf/frontend/src/hooks/useMemoAutosave.ts"
+              },
+              {
+                "label": "frontend/src/lib/memoQueue.ts",
+                "href": "https://github.com/kakaotechcampus-4/ktc4-pusan-1/blob/34d60b434b3785209169892e8ddb731fa4128cbf/frontend/src/lib/memoQueue.ts"
+              },
+              {
+                "label": "ai/src/irya_ai/pipeline/grounding.py",
+                "href": "https://github.com/kakaotechcampus-4/ktc4-pusan-1/blob/34d60b434b3785209169892e8ddb731fa4128cbf/ai/src/irya_ai/pipeline/grounding.py"
+              },
+              {
+                "label": "ai/src/irya_ai/prep_poller.py",
+                "href": "https://github.com/kakaotechcampus-4/ktc4-pusan-1/blob/34d60b434b3785209169892e8ddb731fa4128cbf/ai/src/irya_ai/prep_poller.py"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "document-translate": {
+    "repository": "https://github.com/robinhood0107/document-translate-myfix",
+    "revision": "367f754ccf1157e13c920cf53185b9492690aec8",
+    "sections": [
+      {
+        "heading": "편집 화면과 처리 파이프라인",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "이 프로그램은 문서와 이미지에서 글자 영역을 찾고 OCR과 번역을 거쳐 원래 그림 위에 번역문을 배치하는 데스크톱 편집기다. 기존 comic-translate의 편집 기능을 바탕으로 로컬 OCR 및 번역 모델의 실행 경로를 연결한다. 모델 하나의 출력으로 모든 작업이 끝나는 구조는 아니다."
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "문서와 이미지 입력",
+              "글자 영역 검출",
+              "OCR",
+              "번역",
+              "배경 복원",
+              "재조판과 수동 편집"
+            ]
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "단계",
+              "입력",
+              "출력"
+            ],
+            "rows": [
+              [
+                "영역 검출",
+                "페이지 이미지",
+                "좌표가 붙은 글자 영역"
+              ],
+              [
+                "OCR",
+                "영역의 이미지",
+                "인식한 원문"
+              ],
+              [
+                "번역",
+                "원문과 언어 및 문맥",
+                "번역문"
+              ],
+              [
+                "인페인팅",
+                "원본 이미지와 제거 마스크",
+                "기존 글자를 지운 배경"
+              ],
+              [
+                "렌더링",
+                "배경, 번역문과 서식",
+                "새 글자가 배치된 결과"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "OCR과 번역을 따로 확인하는 이유",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "OCR은 이미지 속 글자를 읽는 단계이고 번역은 읽은 문장을 다른 언어로 바꾸는 단계다. OCR에서 숫자나 부정 표현을 잘못 읽으면 번역기가 자연스러운 문장으로 바꾸더라도 원래 뜻과 달라질 수 있다. 최종 번역문만 보면 어느 단계에서 틀렸는지 구분하기 어렵다."
+          },
+          {
+            "kind": "text",
+            "text": "글자 영역 검출도 OCR과 별도 문제다. 영역을 놓치면 모델이 정확해도 해당 글자는 입력되지 않는다. 원문, 좌표와 번역문을 단계별로 보관하고 편집할 수 있게 하면 자동 처리 결과를 확인한 뒤 필요한 부분만 수정할 수 있다."
+          }
+        ]
+      },
+      {
+        "heading": "좌표와 이미지 변환의 계약",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "화면에서 보는 좌표와 실제 이미지의 픽셀 좌표는 확대율이나 잘라낸 영역 때문에 달라질 수 있다. OCR에 보낼 crop을 만들 때는 어떤 원본과 영역에서 나온 이미지인지 유지해야 한다. 같은 글자라도 crop의 여백과 크기, 압축 방식이 바뀌면 모델 출력이 달라질 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "현재 Paddle 직접 요청 경로는 제품에서 만든 JPEG crop을 해석한 뒤 PNG로 다시 인코딩한다. 원본에서 임의로 새로운 crop을 만든다는 뜻이 아니다. 요청에는 image_url 다음에 OCR: 텍스트를 넣고 응답 정규화도 기존 경로와 호환되도록 다룬다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "제품의 동일 crop\n→ JPEG 바이트 해석\n→ PNG 인코딩\n→ 이미지 먼저, OCR: 문구를 뒤에 넣은 요청\n→ 응답 구조 검사와 기존 형식 정규화"
+          }
+        ]
+      },
+      {
+        "heading": "중계 서버와 직접 요청 경로",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "중계 경로는 앱이 요청한 내용을 다른 모델 서버의 형식으로 바꿔 전달한다. 직접 경로는 앱이 모델 서버의 요청 형식을 맞춰 바로 보낸다. 중계를 없애면 그 계층의 준비 및 전달 비용을 줄일 여지가 있지만 입력 형식과 응답 해석 책임이 앱 쪽으로 옮겨 온다."
+          },
+          {
+            "kind": "text",
+            "text": "현재 전송 코드는 chat completions 응답의 choices와 message 구조를 확인한다. finish_reason이 length이면 잘린 응답으로 구분한다. 일부 글자만 나온 결과를 정상 OCR 완료로 저장하지 않게 하는 경계다. URL의 경로 모양으로 직접 전송 여부를 선택하는 것과 서버의 실제 구현을 인증하는 것은 다르다."
+          }
+        ]
+      },
+      {
+        "heading": "캐시 키와 무효화",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "캐시는 이미 계산한 결과를 다시 쓰는 저장소다. 파일 이름만 같다고 같은 요청으로 볼 수는 없다. 이미지, OCR 모델, 언어와 실행 설정이 바뀌면 다른 결과가 필요할 수 있다. CacheManager는 이미지 식별과 모델 및 언어 등을 키로 사용하며 일부 모델은 cache version도 포함한다."
+          },
+          {
+            "kind": "text",
+            "text": "번역 결과에는 원문과 목표 언어, 번역기 및 추가 문맥이 영향을 준다. OCR 결과를 바꾸고도 예전 번역을 그대로 쓰면 단계 사이의 일관성이 깨진다. 후속 단계의 캐시와 checkpoint를 어떤 변경에서 무효화할지 함께 정해야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "현재 메모리 캐시의 이미지 식별은 전체 이미지의 암호학적 동일성 증명으로 쓰는 값이 아니다. 빠른 재사용을 위한 식별과 보안용 hash 검증을 구분한다. 캐시 적중은 새 계산을 생략했다는 뜻이지 모델이 더 정확해졌다는 뜻도 아니다."
+          }
+        ]
+      },
+      {
+        "heading": "GUI 스레드와 백그라운드 작업",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "GUI는 이벤트 루프가 입력과 화면 갱신을 처리한다. 긴 OCR이나 모델 호출을 같은 흐름에서 기다리면 버튼과 창이 멈춘 것처럼 보일 수 있다. task runner는 처리 작업과 결과를 화면에 반영하는 동작을 나눠 Qt의 작업자 및 신호 경로로 연결한다."
+          },
+          {
+            "kind": "text",
+            "text": "백그라운드 작업을 시작했다고 GUI 위젯을 어느 스레드에서나 바꿔도 되는 것은 아니다. 결과와 오류를 신호로 전달하고 현재 페이지와 작업이 여전히 유효한지 확인한 뒤 반영해야 한다. 취소와 실패도 결과 저장 및 다음 단계 실행과 함께 다뤄야 한다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "Qt의 QThread와 스레드 간 신호",
+                "href": "https://doc.qt.io/qtforpython-6/PySide6/QtCore/QThread.html"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "페이지와 글자 영역의 실패 범위",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "한 영역의 OCR이 실패한 것과 문서 전체를 읽지 못한 것은 다른 오류다. 예를 들어 출력 토큰 상한으로 특정 영역의 텍스트가 잘렸다면, 그 영역의 재요청이나 빈 결과 처리를 판단할 수 있도록 오류 종류를 보존하는 편이 낫다."
+          },
+          {
+            "kind": "text",
+            "text": "부분 실패를 무조건 성공으로 바꾸면 누락을 발견하기 어렵고 모든 부분 실패를 페이지 전체 실패로 올리면 이미 처리한 내용까지 잃을 수 있다. 처리 상태에는 완료, 실패, 캐시 사용 여부와 비어 있는 영역을 구분해 남겨야 한다. 사용자 편집 결과도 자동 재실행이 덮지 않도록 별도로 취급한다."
+          }
+        ]
+      },
+      {
+        "heading": "로컬 모델과 실행 환경",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "앱은 Python과 PySide6로 동작하지만 OCR이나 번역 모델은 별도 로컬 서버를 통해 실행할 수 있다. Docker는 의존성 환경을 묶고 llama.cpp는 선택한 모델 형식을 실행하는 경로를 담당한다. 앱의 버전과 모델 파일, 서버 옵션이 다르면 같은 화면에서도 다른 결과가 나올 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "모델을 계속 메모리에 남기면 다음 작업은 빠르게 시작할 수 있지만 메모리 사용량이 커진다. 캐시를 정리하면 자원을 되돌릴 수 있는 대신 다음 요청에서 모델을 다시 준비할 수 있다. Python 객체를 해제했다고 네이티브 할당기의 메모리가 즉시 OS로 반환된다고 단정하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "속도와 출력 동일성을 함께 비교하기",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "실행 준비, OCR 요청과 전체 runner wall은 서로 다른 시간이다. 여러 요청의 수행 시간을 더한 누적 값과 사용자가 기다린 벽시계 시간도 같지 않다. 병렬 작업에서는 겹쳐 실행된 구간이 있기 때문이다."
+          },
+          {
+            "kind": "text",
+            "text": "기존 경로 비교는 같은 일본어 6페이지와 73개 영역의 출력 동일성을 확인한 조건에서 읽어야 한다. 이 결과를 전체 번역 시간이나 OCR 정답률의 개선으로 바꾸지 않는다. 현재 코드는 이후 변경도 포함하므로 과거 측정값을 현재 모든 모델과 모든 문서의 성능으로 일반화하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "pipeline/main_pipeline.py",
+                "href": "https://github.com/robinhood0107/document-translate-myfix/blob/367f754ccf1157e13c920cf53185b9492690aec8/pipeline/main_pipeline.py"
+              },
+              {
+                "label": "pipeline/cache_manager.py",
+                "href": "https://github.com/robinhood0107/document-translate-myfix/blob/367f754ccf1157e13c920cf53185b9492690aec8/pipeline/cache_manager.py"
+              },
+              {
+                "label": "pipeline/ocr_handler.py",
+                "href": "https://github.com/robinhood0107/document-translate-myfix/blob/367f754ccf1157e13c920cf53185b9492690aec8/pipeline/ocr_handler.py"
+              },
+              {
+                "label": "modules/ocr/paddle_crop/transport.py",
+                "href": "https://github.com/robinhood0107/document-translate-myfix/blob/367f754ccf1157e13c920cf53185b9492690aec8/modules/ocr/paddle_crop/transport.py"
+              },
+              {
+                "label": "app/controllers/task_runner.py",
+                "href": "https://github.com/robinhood0107/document-translate-myfix/blob/367f754ccf1157e13c920cf53185b9492690aec8/app/controllers/task_runner.py"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "trading-coach": {
+    "repository": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach",
+    "revision": "a8baf163172371c1bbf095f6eddea5d56cd6e3c6",
+    "sections": [
+      {
+        "heading": "전체 구조와 책임 경계",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "이 프로젝트는 신호 생성, 자동운용, 주문 허용 판단과 모의 주문 연동을 나눈다. 규칙기반과 LSTM은 시장 자료에서 신호를 만들고 Python 자동운용은 정해진 시각과 거래일에 매매 절차를 진행한다. Spring의 Decision Platform은 제출하려는 주문에 사용자 원칙과 위험 조건을 적용한다."
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "시세와 모델 신호",
+              "Python 자동운용 계획",
+              "Spring의 원칙 및 위험 검사",
+              "KIS 모의 주문 연동",
+              "접수와 체결 조회",
+              "잔고 및 진행 상태 대사"
+            ]
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "구성",
+              "실행 위치와 역할"
+            ],
+            "rows": [
+              [
+                "Next.js",
+                "별도 web 컨테이너에서 설정과 판단 및 주문 상태 표시"
+              ],
+              [
+                "Spring API",
+                "API 컨테이너에서 인증, 원칙과 위험 평가, 주문 허용 검사"
+              ],
+              [
+                "Python 자동운용",
+                "같은 API 컨테이너의 별도 프로세스에서 실행과 재개"
+              ],
+              [
+                "LSTM 추론과 주문 연동",
+                "API 컨테이너의 Python 프로세스에서 예측 및 모의 주문 API 연결"
+              ],
+              [
+                "PostgreSQL과 Redis",
+                "별도 컨테이너에서 영속 기록과 보조 상태 관리"
+              ]
+            ]
+          },
+          {
+            "kind": "text",
+            "text": "같은 컨테이너의 프로세스는 loopback 주소로 연결할 수 있고 다른 컨테이너는 Compose 서비스 이름을 통해 찾는다. Python 모듈이 여러 개 있다는 이유로 각각 독립 컨테이너라고 볼 수는 없다. 모델과 화면은 팀원 영역이며 PM과 Decision Platform의 역할은 이 전체 구조와 구분된다."
+          }
+        ]
+      },
+      {
+        "heading": "규칙기반 신호와 LSTM 예측",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "규칙기반은 사람이 정한 조건을 비교한다. 현재 일일 경로는 가진 이력 중 최대 200거래일의 종가 평균을 기준으로 최근 종가와 RSI를 본다. 초기의 MA5와 MA20 교차 사건을 확인하던 경로와 현재의 추세 상태 판정은 다르다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "현재 일일 규칙의 개념\n종가 > 장기 기준 평균, RSI < 70 → BUY\n종가 < 장기 기준 평균, RSI > 30 → SELL\n그 외 → HOLD"
+          },
+          {
+            "kind": "text",
+            "text": "이동평균은 여러 거래일 가격의 평균이고, RSI는 최근 상승분과 하락분의 크기를 비교한 지표다. RSI를 다음 날 상승 확률로 해석하지 않는다. 이 규칙 자체는 내일 가격을 숫자로 예측하는 모델이 아니다."
+          },
+          {
+            "kind": "text",
+            "text": "LSTM은 과거 입력과 다음 시점의 정답을 비교하며 학습한 가중치를 사용한다. 해당 일일 추론 입력은 20거래일의 시가, 고가, 저가, 종가, 거래량, 전일 대비 수익률, MA5, MA20과 RSI14로 구성된 9개 특성이다. 학습은 가중치를 바꾸고 추론은 이미 정한 가중치를 적용한다."
+          }
+        ]
+      },
+      {
+        "heading": "LSTM의 기억과 예측값 복원",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "LSTM은 시간 순서대로 입력을 처리하면서 숫자로 된 기억 상태를 갱신한다. forget gate는 이전 기억을 얼마나 남길지, input gate는 새 정보를 얼마나 넣을지, output gate는 어떤 정보를 출력에 반영할지 계산한다. 이 gate들은 거래의 매수 허가를 내리는 규칙과는 다른 모델 내부 연산이다."
+          },
+          {
+            "kind": "text",
+            "text": "가격과 거래량은 값의 크기가 다르므로 스케일러로 변환한다. 모델 설정에 따라 출력값을 가격으로 역변환하거나 로그수익률에서 가격을 복원한다. 스케일러와 특성 순서가 학습 때와 다르면 같은 숫자 배열을 넣어도 의미가 달라진다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "예상수익률 = 예측 종가 / 현재 종가 - 1\n예상수익률 > 0.5% → BUY\n예상수익률 < -0.5% → SELL\n그 사이와 경계 → HOLD\n\n가상의 예: 현재 10,000원, 예측 10,100원 → 예상수익률 1%"
+          },
+          {
+            "kind": "text",
+            "text": "예측값은 실제 수익이나 상승 확률의 보증이 아니다. 시간 순서에 맞춘 검증과 미래정보 누출, 과적합을 확인해야 한다. 보존된 모델 평가가 기준선에 미달한 결과도 있으므로 모델이 존재한다는 사실을 수익성 개선으로 바꾸지 않는다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "PyTorch LSTM의 입력과 상태 정의",
+                "href": "https://docs.pytorch.org/docs/2.15/generated/torch.nn.LSTM.html"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "자동운용의 실행과 재개",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "AutomationRuntimeService는 시각과 거래일을 확인하고 DB에 남은 정책, 진행 상태와 계좌 정보를 읽는다. 청산 대상과 매수 후보 및 수량을 계획한 뒤 정확한 주문 내용을 Spring에 평가 요청한다. 허용 결과와 제출 가능 조건이 맞아야 주문 연동 경로로 진행한다."
+          },
+          {
+            "kind": "text",
+            "text": "새 판단 시점과 이미 진행 중인 주문을 조회하는 시점은 구분된다. 현재 경로의 신규 판단 시점은 09:45, 11:00과 14:00이며, 진행 중 주문에는 별도 조회와 재개 경로가 있다. 브라우저 화면을 계속 열어 두어야 작동하는 타이머 스크립트는 아니다."
+          },
+          {
+            "kind": "text",
+            "text": "당일 진입분을 그날 청산 후보로 삼지 않는 조건과 호가 및 미체결 처리도 있다. 손절 조건은 청산 후보를 만드는 규칙이며, 거래소에 상시 stop 주문을 맡기거나 모든 틱을 감시하는 구조로 해석하지 않는다. 호가와 체결 상황 때문에 설정한 손실률 그대로 청산된다는 보장도 없다."
+          }
+        ]
+      },
+      {
+        "heading": "원칙, 정책과 주문 허용 결과",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "원칙은 한 종목 비중이나 손실 한도처럼 사용자가 정한 기준이다. 정책은 필요한 근거가 없을 때 보류할지, 여러 검사 결과를 어떻게 합칠지 정하는 집행 절차다. 같은 비중이라도 계좌, 시세의 기준 시각과 원칙 판본이 다르면 동일한 판단의 입력으로 볼 수 없다."
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "결과",
+              "의미"
+            ],
+            "rows": [
+              [
+                "ALLOW",
+                "검사상 진행 가능"
+              ],
+              [
+                "WARN",
+                "경고와 후속 확인 절차가 붙는 결과"
+              ],
+              [
+                "HOLD",
+                "필수 근거 부족 등으로 제출 보류"
+              ],
+              [
+                "BLOCK",
+                "차단 조건 위반으로 제출 금지"
+              ]
+            ]
+          },
+          {
+            "kind": "text",
+            "text": "결과 우선순위는 BLOCK, HOLD, WARN, ALLOW 순이다. 일반 정책과 달리 자동운용 연결은 ALLOW이고 canSubmitOrder가 true인 경우만 통과한다. LSTM의 HOLD는 신호 변화 기준을 넘지 못했다는 뜻이고 결정 서버의 HOLD는 제출을 보류한다는 뜻이다. ALLOW도 체결 완료를 뜻하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "순수 계산과 외부 작업의 분리",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "RuleEvaluator는 준비된 규칙과 지표 스냅샷을 받아 한도 위반 여부를 계산한다. 단위를 먼저 확인하고 비교 연산을 수행하며 이 함수 자체가 DB를 조회하거나 계좌를 바꾸지는 않는다. 조회, 평가, 저장과 주문을 구분하면 같은 입력에 대한 평가를 별도로 검증할 수 있다."
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "개념",
+              "구분 기준"
+            ],
+            "rows": [
+              [
+                "결정성",
+                "같은 입력과 계산 조건에서 같은 결과"
+              ],
+              [
+                "순수 함수",
+                "계산이 외부 상태나 입력 원본을 바꾸지 않음"
+              ],
+              [
+                "멱등성",
+                "같은 요청을 다시 처리해도 효과가 중복되지 않음"
+              ]
+            ]
+          },
+          {
+            "kind": "text",
+            "text": "수익률, 변동성, MDD와 옵션 가격 계산 함수가 코드에 있다는 사실과 자동운용이 주문마다 그 함수를 부른다는 사실은 다르다. 현재 runtime의 maxDrawdown 관측은 세션 기준 자본 대비 하락분이다. 여러 세션의 최고점 대비 MDD와 구분하고, annualizedVolatility의 0도 실측 변동성이 0이라는 의미로 해석하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "PostgreSQL과 관계형 기록",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "저장해야 하는 것은 현재 가격만이 아니다. 어떤 사용자에게 속한 어느 원칙 판본으로, 어떤 계좌와 시세 근거를 보고 판단했으며 그 판단에 어떤 주문이 연결됐는지를 남겨야 한다. FK와 UNIQUE는 참조 및 중복을 제한하고 CHECK는 행의 값 조합을 검사한다."
+          },
+          {
+            "kind": "text",
+            "text": "관계형 열은 식별자와 관계를 명시하는 데 쓰고 JSONB는 당시 근거의 구조를 보관하는 데 사용할 수 있다. 판본과 hash는 어떤 내용으로 처리했는지 비교하는 수단이다. hash가 같다는 사실만으로 입력 내용이 현실의 사실이라는 점까지 증명되지는 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "PostgreSQL을 쓰는 근거는 현재 요구와 구현의 연결에서 찾는다. MySQL이나 ORM으로 트랜잭션을 구현할 수 없어서 선택한 것은 아니다. 한 DB에서 관계와 접근 조건을 함께 다루는 대신, 기능들이 DB 자원을 공유하고 PostgreSQL 전용 코드의 이전 비용을 감수한다."
+          }
+        ]
+      },
+      {
+        "heading": "스키마, 권한과 RLS",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "스키마는 한 DB 안에서 테이블과 함수 이름을 묶는 논리 공간이다. public이라는 이름이 모든 사용자에게 읽기와 쓰기를 허용한다는 뜻은 아니다. 스키마 사용, 객체 생성, 테이블 조회와 함수 실행 권한은 따로 정한다."
+          },
+          {
+            "kind": "text",
+            "text": "객체 권한은 어느 표나 함수를 사용할 수 있는지 결정하고 RLS는 그중 어떤 행에 접근할 수 있는지 정한다. RLS 정책이 내부 표를 조회한다면 그 조회에 필요한 권한도 문제가 될 수 있다. 제한된 helper를 통해 필요한 조건만 반환하게 하는 구조에서는 함수 소유자 권한과 실행 권한을 함께 검토해야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "SECURITY DEFINER는 함수 소유자 권한으로 실행하는 속성이다. 언어 이름이 아니므로 LANGUAGE sql과 함께 사용할 수도 있다. search_path는 스키마를 생략한 이름을 찾는 순서이며 definer 함수에서는 신뢰할 수 있는 경로와 명시적인 객체 이름을 사용하는 것이 중요하다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "PostgreSQL RLS",
+                "href": "https://www.postgresql.org/docs/16/ddl-rowsecurity.html"
+              },
+              {
+                "label": "SECURITY DEFINER와 함수 정의",
+                "href": "https://www.postgresql.org/docs/16/sql-createfunction.html"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "DB 함수와 저장 경계",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "현재 구현은 NamedParameterJdbcTemplate과 SQL 및 PL/pgSQL 함수를 사용해 중요한 저장 조건을 DB 경계에서도 확인한다. 판단 저장과 자동운용 checkpoint 갱신에서는 요청의 소유 범위, 기대 버전과 중단 상태를 검사하고 관련 기록을 같은 저장 경계에서 다룬다."
+          },
+          {
+            "kind": "text",
+            "text": "PL/pgSQL은 조건 분기, 변수와 예외 처리를 SQL에 연결하는 언어다. BEGIN과 END는 코드 블록의 시작과 끝이며, 그 문법 자체가 별도 트랜잭션을 보장하는 것은 아니다. 실제 커밋과 롤백은 호출된 연결 및 트랜잭션의 경계를 함께 봐야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "앱과 DB에 저장 조건을 나누면 여러 언어의 호출자가 같은 조건을 확인할 수 있는 대신 긴 SQL의 디버깅과 통합 시험이 필요하다. 앱 이미지와 DB 함수의 배포 순서 및 호환성도 관리해야 한다. 외부 API 대기나 모든 금융 계산을 DB 안에 넣는다는 뜻은 아니다."
+          }
+        ]
+      },
+      {
+        "heading": "트랜잭션, 잠금, CAS와 멱등성",
+        "blocks": [
+          {
+            "kind": "table",
+            "headers": [
+              "장치",
+              "다루는 문제"
+            ],
+            "rows": [
+              [
+                "트랜잭션",
+                "관련 기록 중 일부만 저장되는 상황"
+              ],
+              [
+                "행 잠금",
+                "같은 행을 여러 요청이 동시에 변경하는 경합"
+              ],
+              [
+                "CAS",
+                "오래된 버전을 바탕으로 최신 상태를 덮는 요청"
+              ],
+              [
+                "멱등 키와 내용 hash",
+                "재시도로 같은 효과가 중복되거나 같은 키의 내용이 바뀌는 상황"
+              ]
+            ]
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "CAS 개념 예시\nA와 B가 버전 7을 읽음\nA가 버전 7 조건으로 갱신 → 버전 8\nB도 버전 7 조건으로 갱신 → 조건 불일치\n\n멱등 요청\n같은 키와 같은 내용 → 기존 결과\n같은 키와 다른 내용 → 충돌"
+          },
+          {
+            "kind": "text",
+            "text": "비교 조건은 사전 조회만이 아니라 실제 갱신 문장에 들어가야 한다. Redis claim은 동시에 진행할 작업 수를 줄이는 보조 장치이며 최종 진행 상태와 결과의 기준은 DB에 둔다. 주문 응답이 없을 때도 접수 실패로 단정해 다시 보내지 않고 기존 주문 조회와 계좌 대사로 확인한다."
+          }
+        ]
+      },
+      {
+        "heading": "컨테이너, supervisor와 장애 범위",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Dockerfile은 이미지 제작법이고 컨테이너는 그 이미지를 실행한 인스턴스다. 멀티 스테이지 빌드는 빌드 도구가 있는 단계와 최종 실행 단계를 나눈다. 이미지가 만들어졌다는 사실과 그 이미지가 서버에 적용됐다는 사실도 구분된다."
+          },
+          {
+            "kind": "text",
+            "text": "API 컨테이너의 supervisor는 여러 프로세스의 수명을 관리한다. 자동운용 Python 프로세스는 Spring의 준비 상태를 확인한 뒤 시작한다. 자식 종료를 감지하면 나머지 자식도 종료하고 Docker의 재시작 정책이 이후 컨테이너 재시작을 시도한다. 한 컨테이너에 묶으면 배포는 단순해지지만 실패 범위와 개별 확장 단위도 묶인다."
+          },
+          {
+            "kind": "text",
+            "text": "익명 DEMO와 모의 계좌를 사용하는 FULL은 시작할 기능과 권한 범위가 다르다. healthcheck는 상태 확인 수단이며 unhealthy 표시만으로 항상 재시작되는 것은 아니다. named volume은 데이터를 컨테이너 수명과 분리하지만 백업과 고가용성을 대신하지 않는다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "Docker 멀티 스테이지 빌드",
+                "href": "https://docs.docker.com/build/building/multi-stage/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "변경, 배포와 복구의 확인 범위",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "CI는 소스, 타입, 계약과 테스트를 검사하고 이미지를 만들 수 있다. 이미지 저장소나 릴리스에 게시된 상태와 운영 서버가 그 버전을 실행하는 상태는 다르다. 취약점 스캐너의 탐지 건수도 검사 DB 시점과 정책에 따라 달라지며 탐지 0을 모든 결함 0으로 해석하지 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "DB 마이그레이션은 스키마와 함수 및 권한 변경을 순서대로 남긴다. V118은 새 설정과 충돌한 옛 제약 하나를 제거한 변경이며 모든 제약을 없앤 작업이 아니다. 앱 이미지를 되돌리는 작업과 이미 변경된 DB 데이터 및 스키마를 복원하는 작업은 별도의 복구 절차다."
+          },
+          {
+            "kind": "text",
+            "text": "백업 파일이 있다는 것과 필요한 시점으로 복원할 수 있다는 것은 다르다. RPO는 허용할 데이터 손실의 범위, RTO는 복구 시간의 목표다. 코드의 조건, 시험 정의, 시험 통과 기록과 실제 운영 성공은 각각 확인 범위가 다르다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "deploy/p1/docker/decision-platform-supervisor.py",
+                "href": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach/blob/a8baf163172371c1bbf095f6eddea5d56cd6e3c6/deploy/p1/docker/decision-platform-supervisor.py"
+              },
+              {
+                "label": "workspaces/decision-platform/python-services/app/p1_owner/automation_runtime.py",
+                "href": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach/blob/a8baf163172371c1bbf095f6eddea5d56cd6e3c6/workspaces/decision-platform/python-services/app/p1_owner/automation_runtime.py"
+              },
+              {
+                "label": "workspaces/decision-platform/spring-api/src/main/kotlin/com/capstone/decision/domain/risk/RuleEvaluator.kt",
+                "href": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach/blob/a8baf163172371c1bbf095f6eddea5d56cd6e3c6/workspaces/decision-platform/spring-api/src/main/kotlin/com/capstone/decision/domain/risk/RuleEvaluator.kt"
+              },
+              {
+                "label": "workspaces/decision-platform/spring-api/src/main/resources/db/migration/V114__p1_automation_v3_owner_read_scope.sql",
+                "href": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach/blob/a8baf163172371c1bbf095f6eddea5d56cd6e3c6/workspaces/decision-platform/spring-api/src/main/resources/db/migration/V114__p1_automation_v3_owner_read_scope.sql"
+              },
+              {
+                "label": "workspaces/decision-platform/spring-api/src/main/resources/db/migration/V118__p1_automation_policy_drop_stale_v1_profile_check.sql",
+                "href": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach/blob/a8baf163172371c1bbf095f6eddea5d56cd6e3c6/workspaces/decision-platform/spring-api/src/main/resources/db/migration/V118__p1_automation_policy_drop_stale_v1_profile_check.sql"
+              },
+              {
+                "label": "workspaces/decision-platform/python-services/app/p1_owner/daily_inference.py",
+                "href": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach/blob/a8baf163172371c1bbf095f6eddea5d56cd6e3c6/workspaces/decision-platform/python-services/app/p1_owner/daily_inference.py"
+              },
+              {
+                "label": "workspaces/decision-platform/python-services/app/p1_owner/inference.py",
+                "href": "https://github.com/robinhood0107/Capstone-AI-Trading-Coach/blob/a8baf163172371c1bbf095f6eddea5d56cd6e3c6/workspaces/decision-platform/python-services/app/p1_owner/inference.py"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "kb-ansimvoice": {
+    "repository": "https://github.com/robinhood0107/kb-ansimvoice",
+    "revision": "471ade9845916530d04b9b0399460db81b2e223f",
+    "sections": [
+      {
+        "heading": "음성 요청과 모의 거래의 전체 흐름",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "안심보이스는 음성이나 텍스트로 받은 송금 요청을 구조화한 뒤 안전 규칙과 확인 절차에 연결하는 프로토타입이다. 사용자가 말한 내용을 알아듣는 과정과 실제 거래를 허용하는 과정을 분리한다. 이 구조의 음성 안내 연결은 TTS 영역이며 규칙과 모의 금융 상태는 팀의 다른 구성 요소와 연결된다."
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "사용자 발화",
+              "금액과 수취인 초안",
+              "내용 재확인",
+              "규칙과 위험 신호",
+              "필요한 승인",
+              "모의 실행과 TTS 안내"
+            ]
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "계층",
+              "입력과 출력"
+            ],
+            "rows": [
+              [
+                "입력 해석",
+                "자유 문장 또는 STT 결과를 거래 초안으로 변환"
+              ],
+              [
+                "규칙 엔진",
+                "초안을 금액, 수취인, 목적과 시간 조건에 대조"
+              ],
+              [
+                "승인과 모의 실행",
+                "허용 상태와 거래별 승인 조건을 검사"
+              ],
+              [
+                "TTS",
+                "저장된 안내 문장을 음성 파일로 변환"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "STT와 TTS의 차이",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "STT는 음성을 글자로 바꾸고 TTS는 글자를 음성으로 만든다. 발화에서 잘못 읽은 금액을 TTS가 자연스럽게 읽어 주더라도 원래 요청이 맞게 해석됐다는 보장은 없다. 입력 해석의 정확성과 출력 음성의 품질을 별도로 봐야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "브라우저에서 음성을 재생하는 동작도 서버의 합성과는 다른 단계다. 서버가 정상 WAV를 만들었어도 브라우저의 재생 정책이나 기기 설정 때문에 들리지 않을 수 있다. 합성 중, 합성 실패, 재생 차단과 재생 완료를 같은 상태로 묶지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "자유 문장과 거래 초안",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "자유 문장에는 금액이나 수취인이 여러 번 나오고 중간에 정정한 표현이 섞일 수 있다. 거래 초안은 이를 금액, 계좌와 목적 같은 정해진 항목으로 바꾼 결과다. 필수 항목이 없거나 서로 모순되면 실행 전에 다시 확인해야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "현재 transaction_intent에는 외부 모델 없이 슬롯을 채우는 파서도 있다. 숫자만 보고 계좌로 정하거나 여러 수취인 중 하나를 임의로 고르는 방식으로 설명하지 않는다. 해석된 문장이 매끄럽다는 이유만으로 금융 실행 권한을 부여하지 않는 것이 이 경계의 목적이다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "개념 예시\n발화 → 거래 초안\n금액 또는 수취인이 불명확 → 재질문\n초안이 만들어짐 → 화면과 음성으로 다시 확인\n확인된 초안 → 규칙과 승인 검사로 전달"
+          }
+        ]
+      },
+      {
+        "heading": "규칙 판정과 위험 신호",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "규칙 엔진은 활성 규칙을 일정한 순서로 평가한다. 금액이나 수취인, 목적과 시간의 차단 조건이 있으면 BLOCKED, 확인자가 필요한 조건이면 HELD, 해당 조건이 없으면 ALLOW로 구분한다. 이 평가는 LLM의 자유 문장 판단과 분리된 결정론적 처리다."
+          },
+          {
+            "kind": "text",
+            "text": "규칙의 결과와 사기 의심 신호는 같은 값이 아니다. 위험 점수나 신호는 어떤 확인 행동을 할지 정하는 데 쓰일 수 있고, 사용자가 정한 규칙과 신고 계좌 등은 거래를 막는 조건으로 쓰인다. 화면의 신호등 하나를 모든 허가 조건의 대체물로 해석하면 안 된다."
+          }
+        ]
+      },
+      {
+        "heading": "거래별 승인과 실행의 경계",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "승인은 특정 거래 한 건과 연결해야 한다. 수취인과 금액이 바뀐 뒤에도 이전 승인을 그대로 쓰면 사용자가 확인한 내용과 실행할 내용이 달라진다. 거래 상태와 승인 조건, 토큰 재사용 여부를 서버에서 다시 확인하는 이유다."
+          },
+          {
+            "kind": "text",
+            "text": "사람이 확인했다고 모든 단계가 하나의 원자적인 금융 거래가 되는 것은 아니다. 승인 취소와 실행이 동시에 들어오는 상황, 토큰 만료와 저장 오류는 별도의 경합 조건이다. 이 프로젝트는 모의 금융 프로토타입이며 실제 은행의 신원 인증이나 실계좌 권한 체계로 일반화하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "TTS 입력을 저장된 문장으로 제한하기",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "공개 TTS 경로는 임의의 자유 텍스트를 그대로 합성하는 범용 API로 두지 않는다. 저장된 assistant 메시지나 서버가 정한 질문을 기준으로 합성 문장을 선택하고 내부 어댑터가 검증된 문장과 서버가 정한 tone을 TTS 서버에 전달한다."
+          },
+          {
+            "kind": "text",
+            "text": "이렇게 하면 현재 거래 상태와 다른 안내가 임의로 재생되는 범위를 줄일 수 있다. tone도 사용자의 임의 입력보다 서버의 개입 수준과 연결한다. 음성 안내는 거래 허용을 설명하는 출력이며 승인 검사 자체를 대신하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "금액 독음과 캐시",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "금액 표기는 숫자와 쉼표, 만과 억 같은 단위가 섞일 수 있다. TTS 전처리는 원 단위 값을 한국어 독음으로 바꿔 전달한다. 일부 문자열이 포함됐는지만 보는 검사보다 기대한 금액을 정수로 비교하는 검사가 자릿수 오류를 찾는 데 적합하다."
+          },
+          {
+            "kind": "text",
+            "text": "공용 안내 문구는 같은 음성을 재사용할 수 있다. 캐시를 구분할 때는 문장뿐 아니라 말투와 합성 엔진 및 revision도 고려해야 한다. 내용이 같아도 모델이나 설정이 달라지면 다른 음성이기 때문이다. 개인별 동적 문장을 공용 안내 파일과 같은 보관 대상으로 취급하지 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "합성 재사용은 호출을 생략하는 구현 방식이다. 실제 음질이나 비용, 응답시간이 얼마나 달라졌는지는 같은 조건의 측정으로 따로 확인해야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "한 번의 합성과 오류별 대체",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "synthesize_once는 서버 합성을 한 번 시도하고 전체 예산과 개별 호출 시간을 제한한다. timeout, 전송 오류와 잘못된 음성 형식을 구분하며 구성 오류나 인증 오류처럼 재시도로 바로 나아지지 않는 실패도 따로 분류한다."
+          },
+          {
+            "kind": "text",
+            "text": "서버가 실패했을 때 기기 음성으로 대체할 수 있는 경우와 텍스트 안내만 유지해야 하는 경우를 나눈다. 무조건 재시도하면 같은 안내가 늦게 겹쳐 재생되거나 사용자가 이미 다른 거래로 이동한 뒤 응답이 도착할 수 있다. 현재 재생 요청과 이전 응답을 구분하는 일도 필요하다."
+          }
+        ]
+      },
+      {
+        "heading": "음성 품질과 검증의 범위",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "합성한 음성을 다시 STT로 읽는 왕복 검사는 TTS와 STT가 함께 만든 오차를 관찰한다. 실제 청취자가 내용을 이해했는지 확인하는 평가와 같지 않다. 전사가 비어 있는 사례를 분모에서 빼면 품질 수치도 달라질 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "가짜 음성, mock HTTP와 브라우저 재생 대역은 특정 오류 분기를 확인하는 도구다. 실제 모델의 음질과 기기의 재생 성능을 대신 검증하지 않는다. 화면과 텍스트가 유지되는지, 서버의 거래 상태와 음성 안내가 일치하는지, 뒤늦은 응답이 새 재생을 덮지 않는지를 나눠 확인한다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "backend/voice/tts.py",
+                "href": "https://github.com/robinhood0107/kb-ansimvoice/blob/471ade9845916530d04b9b0399460db81b2e223f/backend/voice/tts.py"
+              },
+              {
+                "label": "backend/rules/engine.py",
+                "href": "https://github.com/robinhood0107/kb-ansimvoice/blob/471ade9845916530d04b9b0399460db81b2e223f/backend/rules/engine.py"
+              },
+              {
+                "label": "backend/services/transaction_intent.py",
+                "href": "https://github.com/robinhood0107/kb-ansimvoice/blob/471ade9845916530d04b9b0399460db81b2e223f/backend/services/transaction_intent.py"
+              },
+              {
+                "label": "backend/services/store.py",
+                "href": "https://github.com/robinhood0107/kb-ansimvoice/blob/471ade9845916530d04b9b0399460db81b2e223f/backend/services/store.py"
+              },
+              {
+                "label": "docker-compose.yml",
+                "href": "https://github.com/robinhood0107/kb-ansimvoice/blob/471ade9845916530d04b9b0399460db81b2e223f/docker-compose.yml"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "oliveme": {
+    "repository": "https://github.com/personal-color-app/personal_color_app",
+    "revision": "c7c8fbb4f1a8736842d6675386a1c050fc093ef2",
+    "sections": [
+      {
+        "heading": "사진 진단 이후의 사용자 흐름",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "OliveMe는 사진으로 얻은 퍼스널컬러 참고 결과를 색상 가이드, 제품과 근처 매장 및 저장 이력으로 연결하는 Android 앱이다. 진단 API 하나를 호출하는 기능과 사용자가 이후에도 결과를 찾아보는 앱의 흐름을 함께 다룬다."
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "사진 선택과 품질 확인",
+              "진단 요청 또는 대체 결과",
+              "결과와 가이드",
+              "Room 이력 저장",
+              "상품과 매장 조회",
+              "외부 지도 연결"
+            ]
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "구성",
+              "책임"
+            ],
+            "rows": [
+              [
+                "Compose와 Activity",
+                "화면 표시와 사진 및 외부 앱 진입"
+              ],
+              [
+                "ViewModel",
+                "작업 진행과 화면 상태 관리"
+              ],
+              [
+                "Repository",
+                "외부 응답 변환, 저장소와 대체 경로 연결"
+              ],
+              [
+                "Room",
+                "기기 안의 진단 이력과 색상 및 저장 매장 보관"
+              ],
+              [
+                "외부 API",
+                "사진 분석, 상품과 매장 정보 조회"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "Compose, ViewModel과 상태",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Compose는 현재 상태를 바탕으로 화면을 그린다. ViewModel은 화면 표시와 별개로 진행 중인 작업과 결과 상태를 관리한다. 네트워크 요청을 화면이 다시 그려질 때마다 무조건 실행하면 중복 요청이나 결과 덮어쓰기가 생길 수 있어 작업의 시작 조건과 수명을 구분해야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "Kotlin coroutine은 대기 작업을 중단했다가 다시 이어 갈 수 있게 하는 실행 방식이다. suspend 함수라고 모든 코드가 자동으로 백그라운드 스레드에서 실행되는 것은 아니다. 네트워크, DB와 큰 이미지 연산의 실행 위치를 구분하고 현재 요청의 결과인지 확인한 뒤 화면에 반영해야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "사진 진단과 대체 결과의 차이",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "DiagnosisRepository는 이미지와 품질 정보를 받아 Gemini 분석을 시도하고 입력이 없거나 분석이 실패하면 정책 저장소의 기계 분석 결과로 진행할 수 있다. 결과에는 isFallback과 근거 등의 정보가 연결된다. 항상 외부 모델이 정상 응답했다고 가정하는 경로는 아니다."
+          },
+          {
+            "kind": "text",
+            "text": "조명, 카메라의 색 보정과 얼굴 영역은 사진 색상에 영향을 준다. 화면에 하나의 타입이 나왔다는 사실만으로 실제 퍼스널컬러의 정답이 검증된 것은 아니다. 모델 결과와 기계적 대체 결과, 샘플 가이드를 구분해 표시하고 참고 정보의 범위를 유지해야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "Repository와 외부 응답 변환",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Repository는 화면이 외부 API의 응답 형식을 직접 알지 않아도 앱에서 사용할 결과를 얻도록 연결하는 계층이다. 상품 정보의 빈 응답과 quota 오류, 서버 연결 실패를 앱의 상태로 바꾸는 작업도 여기에 속한다."
+          },
+          {
+            "kind": "text",
+            "text": "서버가 응답했다고 필요한 정보가 모두 있다는 뜻은 아니다. 숫자로 변환할 수 없는 좌표, 비어 있는 제품명이나 누락된 추천 항목은 화면에 넣기 전에 처리해야 한다. 기본값을 채우는 것과 실제 API가 그 값을 제공했다는 사실도 구분한다."
+          }
+        ]
+      },
+      {
+        "heading": "Room과 관계형 이력 저장",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Room은 SQLite 위에서 Entity, DAO와 Database를 연결하는 Android의 로컬 저장 계층이다. Entity는 저장할 행의 구조, DAO는 조회와 변경 함수, Database는 그 접근점을 묶는다. 진단 이력의 식별자로 추천 색상과 제품 항목을 연결하면 저장한 결과를 다시 구성할 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "현재 save 경로는 진단 행, 색상 목록과 제품 목록을 여러 DAO 호출로 저장한다. 여러 호출을 썼다는 이유만으로 전부 하나의 트랜잭션이라고 설명하지 않는다. 전부 함께 저장돼야 하는 요구가 있다면 실제 트랜잭션 경계와 중간 실패 시 남는 행을 확인해야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "Room은 기기 안의 저장소다. 로컬 userId 필터와 저장 이력은 서버의 신원 인증이나 여러 기기의 자동 동기화와 다른 기능이다. 외부 네트워크가 실패해도 저장된 결과를 볼 수 있다는 장점과 기기별 저장이라는 범위를 함께 이해해야 한다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "Room의 Database, Entity와 DAO",
+                "href": "https://developer.android.com/training/data-storage/room"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "상품 조회 실패를 진단 실패와 분리하기",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "진단과 상품 조회가 모두 성공해야만 결과 화면을 보여주면 상품 서버의 장애가 이미 만든 진단 결과까지 가린다. CommerceRepository는 상품이 없는 경우와 API quota, backend 연결 실패를 구분하고 진단 자체의 결과와 다른 상태로 전달한다."
+          },
+          {
+            "kind": "text",
+            "text": "추천 제품은 진단 결과에 덧붙는 정보다. 외부 조회 실패 때 로컬 가이드를 유지하는 것이 실제 서버에서 최신 상품을 받았다는 뜻은 아니다. 사용 가능한 핵심 정보와 추가 조회의 실패 사유를 함께 남기는 방식이다."
+          }
+        ]
+      },
+      {
+        "heading": "위치 검색과 지도 표시",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "매장 검색은 위도와 경도, 반경과 개수 조건을 API에 보내는 작업이다. StoreRepository는 좌표와 요청 한도를 정리하고, 응답 좌표를 숫자로 바꿀 수 있는 매장만 지도 데이터로 만든다. 위도와 경도의 축을 바꾸면 다른 장소를 조회하므로 화면 좌표와 API 매개변수의 의미를 맞춰야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "기기 권한을 받는 것, 현재 위치를 얻는 것과 매장 API가 정상 응답하는 것은 각기 다른 단계다. 키가 없거나 조회가 실패하면 seed 자료가 사용될 수 있다. 이 결과를 현재 위치에 대한 실시간 검색 성공으로 표시해서는 안 된다."
+          }
+        ]
+      },
+      {
+        "heading": "지도 캐시와 재검색",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "지도 화면을 조금 움직일 때마다 전체 페이지나 모든 마커를 다시 만들면 불필요한 작업이 많아질 수 있다. 현재 검색의 위치와 반경, 최대 개수 등을 캐시 키에 포함해 같은 조건의 조회를 재사용하고, 화면의 viewport와 요청 시점을 구분하는 이유다."
+          },
+          {
+            "kind": "text",
+            "text": "캐시에는 유효기간이 있으므로 재사용한 자료가 최신인지와 실제 네트워크를 다시 요청했는지를 나눠야 한다. 짧은 시간의 연속 입력을 모으는 debounce와 이미 계산한 결과를 재사용하는 캐시는 서로 다른 기법이다. 지도 프레임 시간은 모델 추론이나 앱 전체 응답시간과도 별개다."
+          }
+        ]
+      },
+      {
+        "heading": "외부 지도 앱과 Activity 수명",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "앱 안에 매장을 표시하는 기능과 외부 지도 앱으로 보내는 Intent는 다른 경로다. 외부 앱이 설치돼 있지 않거나 주소를 처리할 앱이 없을 수 있으므로, 이동 실패 때 남길 안내와 대안을 준비해야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "외부 앱에서 돌아오면 원래 화면의 선택 상태와 결과를 다시 사용할 수 있어야 한다. Activity 전환과 화면 재생성, 진행 중 coroutine의 취소는 각각 수명이 다르다. 저장, 재시도와 파일 내보내기 역시 완료 안내와 실제 저장 성공을 구분해 다룬다."
+          }
+        ]
+      },
+      {
+        "heading": "구현과 QA 결과를 해석하는 범위",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "사진 진단, 이력 저장과 지도 연결을 구현한 범위와 출시 및 외부 사용자의 효과는 구분한다. 현재 프로젝트는 QA 단계까지의 앱이며 진단 정확도나 상품 추천의 효과를 측정한 운영 서비스로 설명하지 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "기존 지도 QA의 p95는 특정 조작과 환경에서 관측한 값이다. 입력과 표본이 다른 기록을 단순 전후 개선율로 합치지 않는다. 저장소의 단위 테스트나 일부 backend 오류 재현도 Android 실기기의 카메라와 권한, 외부 앱 연결을 전부 검증한 결과는 아니다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "android/app/src/main/java/com/oliveme/app/ViewModels.kt",
+                "href": "https://github.com/personal-color-app/personal_color_app/blob/c7c8fbb4f1a8736842d6675386a1c050fc093ef2/android/app/src/main/java/com/oliveme/app/ViewModels.kt"
+              },
+              {
+                "label": "android/app/src/main/java/com/oliveme/app/data/local/OliveMeDao.kt",
+                "href": "https://github.com/personal-color-app/personal_color_app/blob/c7c8fbb4f1a8736842d6675386a1c050fc093ef2/android/app/src/main/java/com/oliveme/app/data/local/OliveMeDao.kt"
+              },
+              {
+                "label": "android/app/src/main/java/com/oliveme/app/data/repository/DiagnosisRepository.kt",
+                "href": "https://github.com/personal-color-app/personal_color_app/blob/c7c8fbb4f1a8736842d6675386a1c050fc093ef2/android/app/src/main/java/com/oliveme/app/data/repository/DiagnosisRepository.kt"
+              },
+              {
+                "label": "android/app/src/main/java/com/oliveme/app/data/repository/StoreRepository.kt",
+                "href": "https://github.com/personal-color-app/personal_color_app/blob/c7c8fbb4f1a8736842d6675386a1c050fc093ef2/android/app/src/main/java/com/oliveme/app/data/repository/StoreRepository.kt"
+              },
+              {
+                "label": "android/app/src/main/java/com/oliveme/app/data/repository/CommerceRepository.kt",
+                "href": "https://github.com/personal-color-app/personal_color_app/blob/c7c8fbb4f1a8736842d6675386a1c050fc093ef2/android/app/src/main/java/com/oliveme/app/data/repository/CommerceRepository.kt"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "madcamp-stock": {
+    "repository": "https://github.com/madcamp02-web-project/madcamp02-Backend",
+    "revision": "559c6d6d1ae4c113d505aed8092bf88f0778038b",
+    "sections": [
+      {
+        "heading": "시세 조회와 모의 거래의 전체 구조",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "주술사는 미국주식의 시세와 차트를 보면서 모의 매수와 매도를 실행하고 잔고 및 보유 종목을 확인하는 웹 서비스다. 프론트엔드는 사용자의 입력과 화면 표시를 맡고 Spring Boot 백엔드는 가격 조회와 자산 변경 및 거래 기록을 연결한다."
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "종목과 시세 조회",
+              "주문 입력",
+              "잔고와 수량 검사",
+              "지갑 및 보유 종목 변경",
+              "거래 이력 저장",
+              "응답과 실시간 화면 갱신"
+            ]
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "구성",
+              "역할"
+            ],
+            "rows": [
+              [
+                "Next.js 화면",
+                "종목 검색, 차트와 주문 및 포트폴리오 표시"
+              ],
+              [
+                "Java와 Spring Boot",
+                "거래 API, 도메인 계산과 저장 경계"
+              ],
+              [
+                "PostgreSQL",
+                "사용자, 지갑과 보유 종목 및 거래 이력 저장"
+              ],
+              [
+                "Redis와 WebSocket",
+                "시세 캐시와 구독자에게 전달하는 경로"
+              ],
+              [
+                "별도 AI 기능",
+                "거래 원장과 다른 처리 경계의 상담 기능"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "시세와 거래 원장을 구분하는 이유",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "시세는 외부에서 계속 바뀌는 관측값이고 거래 원장은 주문 처리로 변경한 자산의 기록이다. 같은 숫자라고 역할이 같지 않다. 시세 화면에 표시한 가격과 주문 서버가 읽은 가격은 시점이 달라질 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "시세가 잠시 늦는 문제와 잔고가 잘못 차감되는 문제는 복구 방식도 다르다. 화면 표시용 자료를 다시 조회하는 작업이 주문에 따라 확정한 현금 잔고를 임의로 덮지 않도록 조회와 자산 변경의 책임을 구분해 봐야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "외부 API 호출을 트랜잭션 밖에 두기",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "executeOrder는 외부 시세를 먼저 조회한 뒤 executeOrderInTransaction으로 들어간다. 외부 응답을 기다리는 동안 DB의 자산 행 잠금을 계속 보유하지 않으려는 구조다. 트랜잭션 안에서는 주문 조건을 확인하고 저장할 상태를 변경한다."
+          },
+          {
+            "kind": "text",
+            "text": "시세를 먼저 읽으면 잠금 대기 시간을 제한하려는 목적에는 맞지만 읽은 가격이 실제 변경 시점에도 최신이라는 보장은 별개다. 가격의 시각과 유효기간, 외부 데이터 실패를 주문 정책에서 어떻게 다룰지 추가로 확인해야 한다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "외부 시세 조회\n→ Spring 트랜잭션 진입\n→ 지갑 잠금\n→ 주문 조건 검사\n→ 지갑, 보유 종목과 이력 저장\n→ 커밋 또는 롤백"
+          }
+        ]
+      },
+      {
+        "heading": "Spring 프록시와 자기 호출",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "@Transactional은 Spring이 프록시를 통해 호출을 가로채 트랜잭션 경계를 적용하는 방식으로 동작할 수 있다. 같은 객체 안에서 단순히 this의 메서드를 부르면 프록시를 통과하지 않는 자기 호출 문제가 생긴다."
+          },
+          {
+            "kind": "text",
+            "text": "현재 TradeService는 주입받은 self를 통해 트랜잭션 메서드를 호출한다. 메서드에 어노테이션이 있다는 사실만 확인하기보다 실제 호출이 어떤 경계를 통과하는지 봐야 한다. 서비스 분리는 다른 설계 대안이지만 현재 코드와 당시 실제 선택을 섞어 설명하지 않는다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "Spring의 @Transactional과 프록시",
+                "href": "https://docs.spring.io/spring-framework/reference/data-access/transaction/declarative/annotations.html"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "지갑 잠금과 새 보유 종목",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "WalletRepository의 findByUserIdWithLock은 PESSIMISTIC_WRITE 잠금을 요청한다. 같은 사용자의 주문이 지갑을 먼저 잠그도록 하면 아직 해당 종목의 보유 행이 없는 신규 매수도 사용자 단위 자산 변경 순서에 포함할 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "비관적 잠금은 충돌이 가능하다고 보고 변경 전에 행을 보호하는 방식이다. 충돌을 확인한 뒤 거절하는 낙관적 방식과 다르다. 잠금은 다른 작업의 대기를 만들 수 있으므로 가능한 한 짧게 유지하고 여러 행을 잠글 때의 순서도 일관되게 정해야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "READ COMMITTED 같은 격리 수준만 설정했다고 모든 읽기 및 쓰기 경합이 자동으로 사라지는 것은 아니다. 어떤 행을 어느 문장에서 잠그고 변경에 사용하는 값을 언제 읽는지가 중요하다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "PostgreSQL 트랜잭션 격리",
+                "href": "https://www.postgresql.org/docs/16/transaction-iso.html"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "지갑, 보유 종목과 거래 이력의 원자성",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "매수는 필요 금액과 잔고를 비교하고 보유 수량 및 평균 매수가를 변경하며 지갑을 차감한다. 매도는 수량을 확인한 뒤 보유 수량을 줄이고 현금 및 실현 손익을 반영한다. 이때 거래 이력도 함께 저장돼야 자산 상태와 기록을 연결할 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "트랜잭션은 관련 저장이 전부 반영되거나 함께 취소되도록 하는 DB 경계다. 중간 예외가 실제로 그 경계 밖으로 전파되는지와 어떤 예외에서 롤백되는지도 확인해야 한다. 코드에서 세 저장 함수를 순서대로 호출하는 것만으로 원자성이 성립하는 것은 아니다."
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "기록",
+              "담는 내용"
+            ],
+            "rows": [
+              [
+                "지갑",
+                "현금 잔고와 사용자 자산의 상태"
+              ],
+              [
+                "보유 종목",
+                "종목별 수량과 평균 매수가"
+              ],
+              [
+                "거래 이력",
+                "매수 또는 매도한 가격, 수량과 금액"
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "BigDecimal과 금액 계산",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "금액 계산에는 BigDecimal이 쓰인다. 부동소수점의 근삿값이 반복 계산에서 누적되는 문제를 줄이고 반올림 규칙과 소수 자릿수를 명시하기 위한 선택이다. 다만 외부 API가 double로 준 값의 정밀도까지 원래대로 복원하는 기능은 아니다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "개념 예시\n매수 필요 금액 = 가격 × 수량\n평균 매수가 = 기존 보유 원가와 추가 매수 금액의 합 / 새 수량\n실현 손익 = (매도 가격 - 평균 매수가) × 매도 수량"
+          },
+          {
+            "kind": "text",
+            "text": "수수료, 세금과 환율 및 반올림 시점에 따라 결과가 달라질 수 있다. 현재 모의 거래 코드에서 사용한 계산 범위를 실제 증권사의 체결 및 정산 규칙 전체로 일반화하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "실시간 시세와 STOMP 구독",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "REST 조회는 요청 시점의 값을 가져오고 WebSocket은 연결을 유지한 상태에서 새 시세를 전달한다. STOMP는 그 연결 위에서 메시지의 목적지와 구독을 다루는 프로토콜이다. /topic은 여러 구독자에게 보내는 경로이고 /user는 사용자별 목적지를 구성할 때 쓰는 접두사다."
+          },
+          {
+            "kind": "text",
+            "text": "Redis 캐시와 시세 구독은 같은 값의 반복 외부 조회를 줄이는 데 사용할 수 있다. 연결이 끊겼다면 재연결뿐 아니라 활성 종목을 다시 구독하는 과정도 필요하다. 캐시 적중과 최신 시세의 보장은 다른 조건이다."
+          },
+          {
+            "kind": "text",
+            "text": "사용자 목적지 접두사를 설정했다고 소켓 사용자의 신원 검증까지 완료되는 것은 아니다. 실제 연결에 검증된 사용자가 어떻게 묶이는지 확인해야 한다. 화면으로 보낸 알림은 DB 거래 원장과도 다른 기록이다."
+          }
+        ]
+      },
+      {
+        "heading": "커밋과 알림 전달의 순서",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "화면에 체결 알림을 먼저 보낸 뒤 DB 커밋이 실패하면 화면은 성공했다고 보았지만 저장소에는 결과가 없는 상태가 될 수 있다. 현재 기준 판본은 거래 메서드 안에서 알림을 호출하므로 커밋 이후 전달을 보장한다고 설명하지 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "커밋 이후에 알림을 보내더라도 사용자가 접속하지 않았거나 네트워크가 끊기면 전달을 놓칠 수 있다. DB 저장 성공, 소켓 전송 시도, 클라이언트 수신과 읽음은 별도의 상태다. 재접속 후 조회와 재전송, 중복 제거를 보장하려면 각 요구에 맞는 별도 설계가 필요하다."
+          }
+        ]
+      },
+      {
+        "heading": "모의 거래의 검증 범위",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "동시에 주문할 때는 잔고 부족 거절, 수량 경합과 일부 저장 여부를 함께 봐야 한다. 거래만 반복하는 시험과 포트폴리오 조회가 동시에 들어오는 시험은 서로 다른 경합을 드러낼 수 있다. 고정 시세 대역을 쓴 시험은 외부 시세 제공자의 장애까지 검증하지 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "트랜잭션 구현과 실제 운영 처리량은 다른 증거다. HTTP 성공 응답, DB에 반영된 잔고 및 수량, 소켓 알림의 수신 결과를 각각 확인한다. 현재 설명의 기준 판본과 별도 실험 브랜치의 수정 결과도 구분해야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "src/main/java/com/madcamp02/service/TradeService.java",
+                "href": "https://github.com/madcamp02-web-project/madcamp02-Backend/blob/559c6d6d1ae4c113d505aed8092bf88f0778038b/src/main/java/com/madcamp02/service/TradeService.java"
+              },
+              {
+                "label": "src/main/java/com/madcamp02/service/PortfolioService.java",
+                "href": "https://github.com/madcamp02-web-project/madcamp02-Backend/blob/559c6d6d1ae4c113d505aed8092bf88f0778038b/src/main/java/com/madcamp02/service/PortfolioService.java"
+              },
+              {
+                "label": "src/main/java/com/madcamp02/domain/wallet/WalletRepository.java",
+                "href": "https://github.com/madcamp02-web-project/madcamp02-Backend/blob/559c6d6d1ae4c113d505aed8092bf88f0778038b/src/main/java/com/madcamp02/domain/wallet/WalletRepository.java"
+              },
+              {
+                "label": "src/main/java/com/madcamp02/config/WebSocketConfig.java",
+                "href": "https://github.com/madcamp02-web-project/madcamp02-Backend/blob/559c6d6d1ae4c113d505aed8092bf88f0778038b/src/main/java/com/madcamp02/config/WebSocketConfig.java"
+              },
+              {
+                "label": "src/main/java/com/madcamp02/external/FinnhubTradesWebSocketClient.java",
+                "href": "https://github.com/madcamp02-web-project/madcamp02-Backend/blob/559c6d6d1ae4c113d505aed8092bf88f0778038b/src/main/java/com/madcamp02/external/FinnhubTradesWebSocketClient.java"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "net-zero-scm": {
+    "repository": "https://github.com/robinhood0107/Net_Zero_Smart_SCM",
+    "revision": "86921d9178802312de82cf73f39a93ce3e285917",
+    "sections": [
+      {
+        "heading": "공급망 데이터를 연결하는 구조",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Net Zero Smart SCM은 공급사, 부품과 발주, 납품 및 창고 재고와 탄소배출 자료를 관계형 DB로 연결하는 수업 프로젝트다. Java 콘솔과 Spring Boot 웹은 같은 PostgreSQL 자료를 사용하지만 서로 독립적인 진입 경로다. 콘솔의 입력을 웹이 대신 실행하는 순서로 해석하지 않는다."
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "계층",
+              "콘솔",
+              "웹"
+            ],
+            "rows": [
+              [
+                "입력과 조회",
+                "메뉴와 입력 검증",
+                "HTTP 요청과 화면"
+              ],
+              [
+                "업무 처리",
+                "Service에서 발주 및 납품을 조합",
+                "Controller에서 Service로 업무 위임"
+              ],
+              [
+                "DB 접근",
+                "DAO 또는 Repository",
+                "Repository와 DataSource"
+              ],
+              [
+                "저장소",
+                "공통 PostgreSQL 스키마",
+                "공통 PostgreSQL 스키마"
+              ]
+            ]
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "발주서",
+              "발주 품목",
+              "초기 납품",
+              "납품 항목과 재고",
+              "함께 커밋 또는 롤백"
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "관계형 모델의 키와 참조",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "발주서 한 건에는 여러 품목이 있고 같은 발주에 여러 납품이 연결될 수 있다. PK는 행을 구분하고 FK는 다른 행을 참조하는 관계를 제한한다. 연결 키가 없거나 잘못된 값을 허용하면 재고가 어느 발주와 납품에서 생겼는지 추적하기 어렵다."
+          },
+          {
+            "kind": "text",
+            "text": "재고는 창고와 부품의 조합으로 식별한다. 하나의 부품이 여러 창고에 있을 수 있고 같은 창고에 여러 부품이 있기 때문에 한 열만으로는 그 관계를 표현하기 어렵다. 복합키는 이 조합의 중복을 제한한다. CHECK는 수량 등 행 값이 허용하는 조건에 맞는지 검사한다."
+          }
+        ]
+      },
+      {
+        "heading": "하나의 업무와 하나의 트랜잭션",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "과제의 발주 등록은 발주서만 만드는 작업이 아니다. 품목과 초기 납품, 납품 상세와 재고를 함께 반영해야 한다. OrderTransactionService는 같은 Connection을 여러 Repository에 전달하고 자동 커밋을 끈 상태에서 이 변경을 수행한다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "같은 DB 연결 사용\nsetAutoCommit(false)\n발주서와 항목 저장\n초기 납품과 납품 항목 저장\n재고 반영\n전부 성공 → commit\nSQL 예외 → rollback"
+          },
+          {
+            "kind": "text",
+            "text": "각 Repository가 자기 연결을 새로 열고 커밋하면 메서드 호출을 한 서비스에 모았더라도 하나의 트랜잭션이 되지 않는다. 연결을 전달하는 구조는 저장 경계를 업무 단위와 맞추기 위한 선택이다."
+          }
+        ]
+      },
+      {
+        "heading": "JDBC와 PreparedStatement",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "JDBC는 Java에서 DB 연결과 SQL 실행을 다루는 표준 인터페이스다. PreparedStatement는 SQL 문장과 입력 값을 구분해 전달한다. 사용자가 입력한 문자열을 SQL 문법의 일부로 이어 붙이는 것과 다르다."
+          },
+          {
+            "kind": "text",
+            "text": "테이블명과 열 이름은 일반 값 매개변수처럼 바인딩할 수 없는 경우가 있다. 현재 ID 생성 도우미는 사용할 테이블과 열의 조합을 허용 목록으로 제한한 뒤 문장을 구성한다. 입력 값의 바인딩과 객체 이름의 허용 목록은 서로 다른 경계다."
+          },
+          {
+            "kind": "text",
+            "text": "try-with-resources는 예외가 발생해도 Connection과 Statement 같은 자원의 close를 호출하도록 하는 Java 문법이다. 자원 정리와 롤백의 성공은 동일한 사건이 아니므로 각각의 실패를 구분해 기록해야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "재고 UPSERT의 의미",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "UPSERT는 식별 키가 없는 경우 새 행을 만들고 이미 있으면 기존 행을 갱신하는 처리다. 재고에서는 같은 창고와 부품 조합이 처음 들어오면 생성하고, 이미 존재하면 입고 수량을 더하는 흐름에 맞는다."
+          },
+          {
+            "kind": "text",
+            "text": "중복을 판단할 UNIQUE 또는 PK와 갱신할 값의 의미가 함께 정해져야 한다. 현재 수량을 무조건 새 값으로 덮는 갱신과 기존 수량에 입고량을 더하는 갱신은 다른 업무다. UPSERT 하나가 발주와 납품 전체의 원자성을 대신 보장하는 것은 아니다."
+          }
+        ]
+      },
+      {
+        "heading": "READ COMMITTED와 동시 변경",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "서비스는 READ COMMITTED 격리 수준을 설정한다. 다른 트랜잭션이 커밋하지 않은 변경을 읽지 않는다는 기본 성질이 있지만, 트랜잭션 전체에서 모든 조회가 같은 시점을 보거나 동시 작업이 순서대로 실행된다는 뜻은 아니다."
+          },
+          {
+            "kind": "text",
+            "text": "여러 행을 서로 다른 순서로 잠그면 A는 B의 잠금을, B는 A의 잠금을 기다리는 교착 상태가 생길 수 있다. 잠금을 잡는 순서를 정하고 저장 범위를 짧게 유지하는 것과, DB가 교착을 감지한 뒤 트랜잭션을 다시 시도하는 것은 보완적인 방법이다."
+          },
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "PostgreSQL 격리 수준",
+                "href": "https://www.postgresql.org/docs/16/transaction-iso.html"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "교착 재시도와 오류 분류",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "현재 서비스는 SQLSTATE 40P01인 교착 오류에 한해 총 시도를 최대 3회로 제한한다. 이미 저장하던 흐름의 중간 지점만 이어서 실행하는 것이 아니라 새 연결의 트랜잭션에서 전체 업무를 다시 시작한다."
+          },
+          {
+            "kind": "text",
+            "text": "문법 오류나 잘못된 참조, 중복키 오류를 모두 같은 방식으로 재시도하면 원인이 해결되지 않은 요청만 반복할 수 있다. 재시도 횟수는 구현한 상한이며 실제 교착 발생률이나 오류 감소율이 아니다. 롤백 자체가 실패한 상황도 성공적인 복구로 표시하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "MAX 값에 1을 더하는 ID 생성의 한계",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "SequenceGenerator라는 이름과 달리 현재 도우미는 허용한 표에서 MAX(id)에 1을 더해 다음 번호를 계산한다. 동시에 두 요청이 같은 최댓값을 읽으면 같은 번호를 선택할 수 있다. 이름만 보고 PostgreSQL sequence를 사용한다고 설명하면 코드와 달라진다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "개념 예시\n현재 최댓값 = 10\nA가 조회 → 다음 번호 11\nB도 같은 시점에 조회 → 다음 번호 11\n둘 다 저장 시도 → 키 충돌 가능"
+          },
+          {
+            "kind": "text",
+            "text": "DB의 sequence나 identity는 번호 배정을 별도 기능으로 다루는 대안이다. 그 방식도 번호가 빠짐없이 연속한다는 보장과는 다르다. 이 프로젝트의 MAX+1 구현 범위와 실서비스에서 필요한 동시성 조건을 구분한다."
+          }
+        ]
+      },
+      {
+        "heading": "콘솔과 웹을 분리한 비용과 이점",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "공통 DB를 사용하면 화면이 달라도 같은 발주와 재고 관계를 조회할 수 있다. 다만 콘솔과 웹의 입력 검증이나 상태 기본값이 달라질 수 있어 동일한 스키마만 사용한다고 업무 동작까지 자동으로 같아지지는 않는다."
+          },
+          {
+            "kind": "text",
+            "text": "업무 로직과 SQL 호출 경계를 읽을 수 있다는 점은 학습과 시연에 유용하다. 반대로 서비스별 코드가 중복되고 DB 전용 SQL 및 오류 코드에 의존한다. 다른 DB나 ORM과의 처리량 비교로 이 구조의 우위를 측정한 프로젝트로 설명하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "탄소 자료와 검증 범위",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "탄소배출 자료는 공급망의 운송과 수량, 관련 입력을 연결해 조회하는 데이터다. 계산식과 계수의 출처, 단위와 적용 범위를 확인하지 않고 화면의 숫자를 실제 기업의 탄소 감축 성과로 해석할 수는 없다."
+          },
+          {
+            "kind": "text",
+            "text": "관계와 트랜잭션을 구현하고 콘솔 및 웹에서 시연한 범위와 실제 물류 운영, 장애 복구 및 다중 사용자 부하 시험은 다른 검증이다. 같은 DB 연결이 전달되는지와 SQL 예외 때 롤백하는지, 교착 외 오류가 어떻게 반환되는지를 각각 확인한다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "Console_code/src/main/java/hw10/service/OrderTransactionService.java",
+                "href": "https://github.com/robinhood0107/Net_Zero_Smart_SCM/blob/86921d9178802312de82cf73f39a93ce3e285917/Console_code/src/main/java/hw10/service/OrderTransactionService.java"
+              },
+              {
+                "label": "Web_code/src/main/java/hw10/service/OrderTransactionService.java",
+                "href": "https://github.com/robinhood0107/Net_Zero_Smart_SCM/blob/86921d9178802312de82cf73f39a93ce3e285917/Web_code/src/main/java/hw10/service/OrderTransactionService.java"
+              },
+              {
+                "label": "Console_code/src/main/java/hw10/dao/SequenceGenerator.java",
+                "href": "https://github.com/robinhood0107/Net_Zero_Smart_SCM/blob/86921d9178802312de82cf73f39a93ce3e285917/Console_code/src/main/java/hw10/dao/SequenceGenerator.java"
+              },
+              {
+                "label": "Console_code/schema.sql",
+                "href": "https://github.com/robinhood0107/Net_Zero_Smart_SCM/blob/86921d9178802312de82cf73f39a93ce3e285917/Console_code/schema.sql"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "morse-fpga": {
+    "repository": "https://github.com/robinhood0107/Morse_Term_Project",
+    "revision": "077faf017220a3e7b1c9d65ca4ca7f2004668c19",
+    "sections": [
+      {
+        "heading": "소프트웨어 실행과 다른 RTL 구조",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "FPGA 모스부호 송수신기는 문자 선택과 저장, 점과 선의 시간 패턴 및 표시 장치를 Verilog로 연결한 수업 팀 프로젝트다. RTL은 프로그램 문장을 CPU가 한 줄씩 실행하는 설명이 아니라 레지스터와 그 사이의 조합 논리를 기술한다."
+          },
+          {
+            "kind": "table",
+            "headers": [
+              "모듈",
+              "입력",
+              "출력과 책임"
+            ],
+            "rows": [
+              [
+                "Clock_Divider",
+                "보드 클록과 리셋",
+                "초 및 반초 진행을 나타내는 카운터"
+              ],
+              [
+                "TX_Module",
+                "선택과 저장 및 송신 버튼",
+                "저장 문자, 송신 진행과 LED 및 버저"
+              ],
+              [
+                "RX_Module",
+                "점, 선과 확인 버튼",
+                "입력 패턴을 해독한 문자 버퍼"
+              ],
+              [
+                "Top과 표시 드라이버",
+                "모드 및 각 모듈의 상태",
+                "7-segment와 LCD 출력 연결"
+              ]
+            ]
+          },
+          {
+            "kind": "flow",
+            "steps": [
+              "버튼과 스위치",
+              "이전 입력과 상태 비교",
+              "문자 및 패턴 버퍼",
+              "송수신 진행",
+              "LED와 문자 표시"
+            ]
+          }
+        ]
+      },
+      {
+        "heading": "클록과 레지스터 갱신",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "always 블록의 posedge iCLK는 클록의 상승 경계에서 상태를 갱신하는 순차 논리를 표현한다. 여러 always 블록이 있다고 각각을 일반 소프트웨어의 순차 함수 호출로 해석하지 않는다. 합성 후에는 관련 논리가 클록을 공유하며 동작한다."
+          },
+          {
+            "kind": "text",
+            "text": "nonblocking 대입인 <=는 같은 클록 경계에서 읽은 이전 상태를 바탕으로 다음 상태를 예약한다. 계산 중간에 즉시 값을 바꾸는 blocking 대입인 =와 의미가 다르다. reset에서 어떤 레지스터를 어떤 값으로 만드는지, 정상 경로에서 값을 할당하지 않을 때 이전 상태가 유지되는지도 중요하다."
+          }
+        ]
+      },
+      {
+        "heading": "분주 카운터의 시간 의미",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Clock_Divider는 보드 클록을 세어 반초 진행 값을 바꾼다. 코드가 가정한 50MHz에서는 한 주기가 20ns이고 25,000,000주기가 0.5초에 해당한다. 이는 그 주파수 전제에서 계산한 논리 시간이며 실제 보드의 타이밍 검증과는 구분된다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "50MHz 전제의 계산\n1 / 50,000,000초 = 20ns\n25,000,000번 카운트 = 0.5초\n50클록 동안 Enable 유지 = 1µs"
+          },
+          {
+            "kind": "text",
+            "text": "반초 카운터의 값이 바뀌는 것을 송신 진행의 기준으로 사용할 수 있다. 이 신호를 별도 CPU 타이머나 모든 로직의 새 클록이라고 부를 필요는 없다. 모스 패턴의 논리적인 시간과 보드 핀에서 관측한 실제 신호는 각각 확인해야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "버튼의 edge와 debounce",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "버튼은 눌린 상태가 여러 클록 동안 유지된다. 현재 입력과 key_prev를 비교해 눌림으로 바뀐 순간을 찾으면 한 번 누른 것을 매 클록 반복 처리하는 문제를 줄일 수 있다. active-low 입력에서는 이전 값이 1이고 현재 값이 0인 경계를 본다."
+          },
+          {
+            "kind": "text",
+            "text": "edge 검출이 기계식 버튼의 튐을 제거하는 debounce와 같은 것은 아니다. 실제 버튼은 한 번 눌러도 짧은 시간 여러 번 바뀔 수 있고 외부 비동기 신호에는 동기화도 필요하다. 현재 입력 비교만으로 모든 보드 환경의 잡음과 메타안정성을 해결했다고 설명하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "송신 문자와 시간 패턴",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "송신은 선택한 영문자를 저장한 뒤 문자별 점과 선 패턴을 출력용 비트열로 확장하는 흐름이다. 문자 종류를 나타내는 값과 점 또는 선의 길이를 나타내는 값은 다른 표현이다. 현재 표시 데이터에는 저장한 7글자와 지금 선택 중인 1글자가 구분돼 있다."
+          },
+          {
+            "kind": "text",
+            "text": "is_transmitting과 전송 인덱스는 지금 어느 위치를 출력할지 결정한다. LED는 해당 비트의 켜짐과 꺼짐을 보여주고 버저는 그 구간에 음을 출력한다. 선택 버튼, 저장 버튼과 전송 시작 버튼이 바꾸는 상태를 나누어 봐야 한다."
+          },
+          {
+            "kind": "text",
+            "text": "표시 위치가 8개라는 사실을 저장 용량이나 송신 처리량 전체가 8글자라는 뜻으로 바꾸지 않는다. 저장 버퍼, 현재 선택과 실제로 확장한 전송 비트열은 서로 다른 데이터다."
+          }
+        ]
+      },
+      {
+        "heading": "수신은 점과 선 버튼으로 입력",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "현재 수신 경로는 버튼을 누른 시간으로 점과 선을 구별하는 방식이 아니다. 점과 선에 해당하는 버튼 edge를 받아 stack에 패턴을 넣고 count로 길이를 세며, 확인 버튼이 들어오면 길이와 비트 조합을 문자로 변환한다."
+          },
+          {
+            "kind": "code",
+            "language": "text",
+            "code": "개념 예시\n점 버튼 → 패턴 0, 길이 1\n선 버튼 → 패턴 01, 길이 2\n확인 버튼 → 길이 2와 패턴 01을 문자로 해독\n문자 버퍼에 반영하고 현재 입력 패턴 초기화"
+          },
+          {
+            "kind": "text",
+            "text": "문자 버퍼의 cursor는 다음 글자를 넣을 위치를 정한다. 버퍼가 가득 찼을 때의 덮어쓰기와 잘못된 입력 조합, reset 이후 상태는 각각 다른 조건이다. 일부 case만 있는 매핑에 이전 decoded 값이 남을 수 있어 대표 입력의 성공을 모든 알파벳과 모든 잘못된 입력의 정확성으로 일반화하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "Top의 모드 선택과 출력 MUX",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "Top은 스위치 값으로 송신과 수신의 enable을 선택하고 각 출력선을 연결한다. MUX는 조건에 따라 어떤 신호를 출력할지 고르는 선택 논리다. 예를 들어 송신 모드에서만 LED와 버저의 송신 출력을 바깥 핀으로 보낼 수 있다."
+          },
+          {
+            "kind": "text",
+            "text": "바깥 출력을 가리는 것과 모듈 내부 상태를 초기화하는 것은 다른 동작이다. 모드를 바꿨다고 내부 송신 상태까지 반드시 즉시 초기화됐다고 가정하지 않는다. 현재 선택, 저장된 문자와 진행 중 상태의 수명은 각 모듈의 enable 및 reset 조건으로 확인한다."
+          }
+        ]
+      },
+      {
+        "heading": "7-segment와 LCD의 구동",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "여러 자리 7-segment는 자릿수를 빠르게 선택하고 그때 해당 문자의 segment 패턴을 출력하는 방식으로 구동한다. 같은 선을 여러 자리가 공유하기 때문에 선택 신호와 문자 데이터가 맞아야 한다. 표시 모양이 비슷한 문자와 실제 내부 문자 값의 정확성도 구분한다."
+          },
+          {
+            "kind": "text",
+            "text": "LCD는 문자 데이터만 보내면 끝나지 않는다. 초기화 명령과 표시 설정, 데이터 쓰기 순서를 지키고 Enable을 정해진 시간 동안 유지해야 한다. 현재 드라이버는 카운터와 상태로 고정 대기를 만들며 busy flag를 읽는 방식은 아니다."
+          },
+          {
+            "kind": "text",
+            "text": "50클록의 Enable 폭이 50MHz 전제에서 1µs라는 계산만으로 모든 LCD 타이밍이 검증되지는 않는다. 데이터와 RS의 설정 시점, 전압과 패널 종류 및 초기화 대기 조건도 함께 봐야 한다."
+          }
+        ]
+      },
+      {
+        "heading": "테스트벤치와 파형 읽기",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "테스트벤치는 클록과 리셋, 버튼 입력을 만들어 설계에 넣고 내부 상태나 출력을 관찰하는 시뮬레이션 코드다. 파형에서는 입력이 바뀐 시점과 상태 갱신의 클록 경계, 출력 비트가 변한 시점을 서로 비교한다."
+          },
+          {
+            "kind": "text",
+            "text": "파형 파일이 생성됐다고 기대한 결과를 자동 판정했다는 뜻은 아니다. 현재 테스트벤치의 관찰 범위와 실제 assertion의 존재를 구분해야 한다. 단위 시간을 짧게 바꾼 시뮬레이션은 논리 순서를 확인하는 데 쓸 수 있지만 보드의 실제 0.5초 간격을 측정한 결과가 되지는 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "합성 결과와 보드 동작의 구분",
+        "blocks": [
+          {
+            "kind": "text",
+            "text": "시뮬레이션은 RTL의 논리 동작을 보고 합성과 배치 및 배선은 그 설계를 FPGA 자원에 옮긴다. 핀 연결과 전압 규격, 클록 제약과 타이밍 여유는 별도로 확인한다. 소스가 컴파일된다는 사실만으로 보드의 모든 타이밍과 입력 조건이 만족되는 것은 아니다."
+          },
+          {
+            "kind": "text",
+            "text": "보드에서 기능 동작을 확인한 범위와 특정 revision의 모든 문자 매핑을 전수 검사한 범위도 다르다. 현재 설명은 송수신과 표시의 구조를 대상으로 하며, 전체 문자 정확도나 모든 기기 및 버튼 조건에 대한 실측 성능으로 확대하지 않는다."
+          }
+        ]
+      },
+      {
+        "heading": "구현 근거",
+        "blocks": [
+          {
+            "kind": "references",
+            "items": [
+              {
+                "label": "Clock_Divider.v",
+                "href": "https://github.com/robinhood0107/Morse_Term_Project/blob/077faf017220a3e7b1c9d65ca4ca7f2004668c19/Clock_Divider.v"
+              },
+              {
+                "label": "Morse_Transceiver_Top.v",
+                "href": "https://github.com/robinhood0107/Morse_Term_Project/blob/077faf017220a3e7b1c9d65ca4ca7f2004668c19/Morse_Transceiver_Top.v"
+              },
+              {
+                "label": "RX_Module.v",
+                "href": "https://github.com/robinhood0107/Morse_Term_Project/blob/077faf017220a3e7b1c9d65ca4ca7f2004668c19/RX_Module.v"
+              },
+              {
+                "label": "TX_Module.v",
+                "href": "https://github.com/robinhood0107/Morse_Term_Project/blob/077faf017220a3e7b1c9d65ca4ca7f2004668c19/TX_Module.v"
+              },
+              {
+                "label": "LCD_Driver.v",
+                "href": "https://github.com/robinhood0107/Morse_Term_Project/blob/077faf017220a3e7b1c9d65ca4ca7f2004668c19/LCD_Driver.v"
+              },
+              {
+                "label": "testbench-tb_morse.v",
+                "href": "https://github.com/robinhood0107/Morse_Term_Project/blob/077faf017220a3e7b1c9d65ca4ca7f2004668c19/testbench-tb_morse.v"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,27 +2,27 @@ import type { Metadata } from "next";
 import "./globals.css";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { ogBase, SITE_URL, profile } from "@/data/profile";
+import { ogBase, SITE_NAME, SITE_URL, profile } from "@/data/profile";
 
 const description = profile.summary;
 
 export const metadata: Metadata = {
   metadataBase: new URL(`${SITE_URL}/`),
   title: {
-    default: `${profile.name} | ${profile.role}`,
-    template: `${profile.name} | %s`,
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
   },
   description,
   alternates: { canonical: `${SITE_URL}/` },
   openGraph: {
     ...ogBase,
     url: `${SITE_URL}/`,
-    title: `${profile.name} | ${profile.role}`,
+    title: SITE_NAME,
     description,
   },
   twitter: {
     card: "summary",
-    title: `${profile.name} | ${profile.role}`,
+    title: SITE_NAME,
     description,
   },
 };

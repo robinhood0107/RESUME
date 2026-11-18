@@ -85,6 +85,24 @@
         ]
       },
       {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "Gateway와 Vault 분리",
+                "text": "가명 처리와 원래 값의 보관을 나눴습니다. Gateway는 검사한 문서만 전달하고 Vault는 요청별 대응 관계를 관리해 다른 요청의 값이 복원에 섞이지 않도록 합니다."
+              },
+              {
+                "title": "문서 추출의 실패 범위 제한",
+                "text": "PDF와 한글 문서를 읽는 작업을 별도로 실행해 추출 오류가 핵심 처리로 번지는 범위를 줄였습니다. 검사에 실패한 문서는 원문을 보내지 않고 중단합니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
         "heading": "Development",
         "blocks": [
           {
@@ -154,7 +172,9 @@
     ],
     "links": {
       "caseStudy": "/portfolio/irya/",
-      "live": "https://irya.cloud/"
+      "github": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
+      "live": "https://irya.cloud/",
+      "demo": "/portfolio/irya/#demo"
     },
     "sections": [
       {
@@ -218,6 +238,24 @@
           {
             "kind": "text",
             "text": "React 화면이 FastAPI 서버와 연결되고, LiveKit이 화상 통화를 담당합니다. 음성 전사와 AI 분석은 별도 작업으로 처리해 결과를 화면에 연결합니다."
+          }
+        ]
+      },
+      {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "화상 통화와 면접 데이터 분리",
+                "text": "React 화면은 FastAPI로 면접 자료와 메모를 관리하고 LiveKit으로 화상 통화에 연결됩니다. 통화 연결과 기록 저장의 역할을 구분하고 전사와 AI 분석 결과를 같은 면접 기록에서 검토하도록 연결한 팀 구조입니다."
+              },
+              {
+                "title": "저장 충돌을 숨기지 않는 메모",
+                "text": "여러 화면이 같은 메모를 수정할 때 뒤늦은 저장이 최신 내용을 덮어쓰지 않도록 서버의 저장 조건을 확인합니다. 충돌을 알리고 작성 중인 초안을 보존해 사용자가 내용을 확인한 뒤 다시 저장하도록 했습니다."
+              }
+            ]
           }
         ]
       },
@@ -421,6 +459,24 @@
         ]
       },
       {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "기존 편집기와 모델 실행 경로 구분",
+                "text": "기존 편집기와 번역 흐름은 유지하면서 로컬 OCR과 번역 모델을 연결했습니다. 인식, 번역, 배경 복원과 재조판을 나눠 결과를 확인하고 같은 입력과 설정의 완료 결과를 재사용합니다."
+              },
+              {
+                "title": "중계 제거 전후의 출력 비교",
+                "text": "느린 구간을 찾으려고 실행 준비와 OCR 요청 시간을 나눠 확인했습니다. 중계 서버를 거치던 요청을 직접 보내도록 바꿀 때는 이미지 형식과 처리 규칙을 맞추고 같은 입력의 글자 영역과 출력을 비교했습니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
         "heading": "Development",
         "blocks": [
           {
@@ -580,6 +636,24 @@
         ]
       },
       {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "모델 신호와 주문 판단 분리",
+                "text": "팀원이 만든 모델의 신호를 바로 주문으로 보내지 않고 Decision Platform에서 사용자 원칙과 보유 종목, 위험 조건을 다시 확인합니다. 예측 결과와 실제 주문을 허용하는 판단을 구분한 구조입니다."
+              },
+              {
+                "title": "주문 접수와 체결 확인 분리",
+                "text": "접수 응답만으로 체결을 확정하지 않고 주문 상태와 잔고를 따로 확인합니다. 응답을 잃었을 때 다시 주문하는 대신 기존 주문을 조회하며 판단에 사용한 원칙과 근거도 기록합니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
         "heading": "Development",
         "blocks": [
           {
@@ -643,7 +717,8 @@
     ],
     "links": {
       "github": "https://github.com/robinhood0107/kb-ansimvoice",
-      "caseStudy": "/portfolio/kb-ansimvoice/"
+      "caseStudy": "/portfolio/kb-ansimvoice/",
+      "demo": "/portfolio/kb-ansimvoice/#demo"
     },
     "sections": [
       {
@@ -708,6 +783,24 @@
           {
             "kind": "text",
             "text": "고객과 보호자 화면이 FastAPI 서버로 연결됩니다. AI가 거래 초안과 설명을 만들고 규칙 엔진과 일회용 승인이 모의 송금 여부를 결정하며 TTS가 안내를 음성으로 전달합니다."
+          }
+        ]
+      },
+      {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "요청 해석과 실행 권한 분리",
+                "text": "AI는 거래 초안을 만들고 규칙 엔진과 일회용 승인이 모의 송금 여부를 결정합니다. 음성 인식이나 모델의 해석이 틀려도 바로 송금되지 않도록 나눈 팀의 구조이며 제 담당은 TTS 연동입니다."
+              },
+              {
+                "title": "화면 안내를 음성으로 연결",
+                "text": "확인 내용과 다음 행동을 화면과 음성으로 함께 전달합니다. TTS는 안내를 읽는 역할을 맡고 거래 승인 자체를 대신하지 않도록 기존 거래 흐름에 연결했습니다."
+              }
+            ]
           }
         ]
       },
@@ -877,6 +970,24 @@
           {
             "kind": "text",
             "text": "Kotlin과 Jetpack Compose 화면을 데이터 저장소 및 외부 API와 연결했습니다. Room이 진단 이력을 저장하고 Gemini와 지도 및 상품 API가 필요한 정보를 가져옵니다."
+          }
+        ]
+      },
+      {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "진단 결과와 외부 조회의 실패 분리",
+                "text": "상품 조회나 외부 지도 앱 연결에 실패해도 이미 받은 진단 결과는 남기도록 구성했습니다. 진단과 저장 결과를 보여주는 화면에서 외부 서비스의 오류 안내를 따로 처리합니다."
+              },
+              {
+                "title": "로컬 이력과 외부 API 구분",
+                "text": "Room에 진단 이력을 저장해 이전 결과를 다시 불러오고 진단과 매장 조회에 필요한 정보는 외부 API에서 가져옵니다. ViewModel과 Repository가 화면 상태와 응답 변환, 저장을 연결합니다."
+              }
+            ]
           }
         ]
       },
@@ -1068,6 +1179,24 @@
         ]
       },
       {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "시세 조회와 자산 변경 분리",
+                "text": "외부 시세를 먼저 구한 뒤 자산을 바꾸는 트랜잭션에 진입합니다. 시세 응답을 기다리는 작업과 잔고를 잠그고 변경하는 작업을 나눴습니다. 다른 주문이 잠금을 기다리는 구간을 제한하려는 구조입니다."
+              },
+              {
+                "title": "잔고와 보유 수량을 함께 저장",
+                "text": "주문에 따른 지갑, 보유 종목과 거래 이력 변경을 같은 트랜잭션으로 묶었습니다. 일부 저장만 끝난 상태가 남지 않도록 하고 팀원이 담당한 프론트엔드에 주문 결과를 연결했습니다."
+              }
+            ]
+          }
+        ]
+      },
+      {
         "heading": "Development",
         "blocks": [
           {
@@ -1193,7 +1322,8 @@
     ],
     "links": {
       "github": "https://github.com/robinhood0107/Net_Zero_Smart_SCM",
-      "caseStudy": "/portfolio/net-zero-scm/"
+      "caseStudy": "/portfolio/net-zero-scm/",
+      "demo": "/portfolio/net-zero-scm/#demo"
     },
     "sections": [
       {
@@ -1257,6 +1387,24 @@
           {
             "kind": "text",
             "text": "Java 콘솔 도구와 Spring Boot 웹 애플리케이션이 같은 PostgreSQL 데이터를 사용합니다. 발주와 납품 및 재고 변경은 하나의 DB 연결과 트랜잭션으로 처리합니다."
+          }
+        ]
+      },
+      {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "업무 한 건을 하나의 트랜잭션으로 처리",
+                "text": "과제 요구에 따라 발주와 품목, 납품과 재고 변경을 같은 DB 연결로 처리했습니다. 모두 성공하면 저장하고 SQL 오류가 나면 함께 되돌려 관련 수량이 서로 다른 상태로 남지 않도록 합니다."
+              },
+              {
+                "title": "콘솔과 웹이 같은 데이터 사용",
+                "text": "Java 콘솔과 Spring Boot 웹은 각각 같은 PostgreSQL 데이터에 접근합니다. 콘솔이 웹을 거쳐 실행되는 순서가 아니며 SQL 오류를 구분해 교착 상태에만 정해진 횟수로 재시도합니다."
+              }
+            ]
           }
         ]
       },
@@ -1455,6 +1603,24 @@
           {
             "kind": "text",
             "text": "버튼 입력이 송수신 상태와 문자 버퍼를 바꾸고 그 상태를 LED와 7-segment 및 LCD로 전달합니다. 클록과 상태 전이를 기준으로 모듈을 연결했습니다."
+          }
+        ]
+      },
+      {
+        "heading": "Design Decisions",
+        "blocks": [
+          {
+            "kind": "cards",
+            "items": [
+              {
+                "title": "입력과 송수신, 표시 모듈 구분",
+                "text": "수업에서 배운 논리회로를 버튼 입력과 문자 변환, 보드 출력으로 연결한 과제입니다. 클록에 따른 상태 전이를 기준으로 송신과 수신 로직을 나누고 LED와 7-segment 및 LCD에 상태를 표시합니다."
+              },
+              {
+                "title": "입력에 따른 상태와 파형 확인",
+                "text": "테스트벤치에서 입력을 주고 내부 상태와 출력 파형을 비교해 문자 선택과 저장, 송신 흐름을 확인합니다. 시뮬레이션에서 확인한 내용과 실제 보드의 동작 확인 범위는 구분합니다."
+              }
+            ]
           }
         ]
       },

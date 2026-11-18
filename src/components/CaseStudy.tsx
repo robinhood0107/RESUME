@@ -13,14 +13,16 @@ import type {
 export function ProjectCover({ cover }: { cover: Screenshot }) {
   return (
     <figure className="print-keep print-cover mt-8 print:mt-5">
-      <Image
-        src={assetPath(cover.src)}
-        alt={cover.alt}
-        width={cover.width}
-        height={cover.height}
-        sizes="(max-width: 860px) 100vw, 860px"
-        className="h-auto max-h-[440px] w-full border border-rule object-contain"
-      />
+      <a href={assetPath(cover.src)} target="_blank" rel="noopener noreferrer" aria-label={`${cover.title} 원본 이미지 열기 (새 창)`}>
+        <Image
+          src={assetPath(cover.src)}
+          alt={cover.alt}
+          width={cover.width}
+          height={cover.height}
+          sizes="(max-width: 860px) 100vw, 860px"
+          className="h-auto max-h-[440px] w-full border border-rule object-contain"
+        />
+      </a>
       {cover.caption && (
         <figcaption className="mt-2 text-[12px] leading-[1.55] text-muted">
           {cover.caption}
@@ -60,6 +62,12 @@ function ScreenshotGrid({
           className={`print-keep ${isPhone ? "print-shot" : "print-shot-wide"}`}
         >
           <figure>
+            <div
+              className={shot.src.endsWith("/architecture.svg") ? "overflow-x-auto" : undefined}
+              tabIndex={shot.src.endsWith("/architecture.svg") ? 0 : undefined}
+              role={shot.src.endsWith("/architecture.svg") ? "region" : undefined}
+              aria-label={shot.src.endsWith("/architecture.svg") ? "전체 아키텍처, 좌우로 이동 가능" : undefined}
+            >
             <a
               href={assetPath(shot.src)}
               target="_blank"
@@ -73,9 +81,10 @@ function ScreenshotGrid({
                 height={shot.height}
                 loading="lazy"
                 sizes={isPhone ? "(max-width: 768px) 45vw, 200px" : "(max-width: 640px) 100vw, 420px"}
-                className="h-auto w-full rounded-sm border border-rule object-contain"
+                className={`h-auto w-full rounded-sm border border-rule object-contain ${shot.src.endsWith("/architecture.svg") ? "min-w-[720px] print:min-w-0" : ""}`}
               />
             </a>
+            </div>
             <figcaption className="mt-2">
               <span className="block text-[12.5px] font-semibold">{shot.title}</span>
               {shot.caption && shot.caption !== shot.title && (
@@ -83,6 +92,10 @@ function ScreenshotGrid({
                   {shot.caption}
                 </span>
               )}
+              {shot.src.endsWith("/architecture.svg") && <>
+                <span className="mt-1 block text-[12px] text-muted sm:hidden">작은 화면에서는 구조도를 좌우로 밀어 볼 수 있습니다.</span>
+                <a href={assetPath(shot.src)} target="_blank" rel="noopener noreferrer" className="mt-1 block text-[12px] text-accent underline underline-offset-4">구조도 원본 열기 ↗</a>
+              </>}
             </figcaption>
           </figure>
         </li>
@@ -163,7 +176,7 @@ function Diagram({ caption, stages }: { caption?: string; stages: DiagramStage[]
   );
 }
 
-/** 성과 지표. 상세 페이지와 Portfolio Overview 카드에서 함께 쓴다. */
+/** 상세 페이지에서 조건과 함께 보여주는 결과 수치. */
 export function Metrics({ items }: { items: { value: string; label: string }[] }) {
   return (
     <dl className="grid grid-cols-2 gap-6 sm:grid-cols-4">
@@ -288,7 +301,7 @@ function BlockView({ block }: { block: Block }) {
     case "video":
       return (
         <figure>
-          <video controls playsInline preload="metadata" poster={assetPath(block.poster)} aria-label={block.title} className="h-auto w-full border border-rule">
+          <video controls playsInline preload="metadata" poster={assetPath(block.poster)} aria-label={block.title} className="h-auto max-h-[520px] w-full border border-rule bg-[#f8fafc] object-contain">
             {block.sources.map((source) => <source key={source.src} src={assetPath(source.src)} type={source.type} />)}
             {block.captions && <track kind="captions" src={assetPath(block.captions.src)} srcLang={block.captions.srcLang} label={block.captions.label} default />}
             {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download>영상 내려받기 ({source.type === "video/mp4" ? "MP4" : "WebM"})</a>)}
@@ -306,14 +319,13 @@ function BlockView({ block }: { block: Block }) {
   }
 }
 
-/** 프로젝트 제목 · 기간 · Role · Stack. 상세 페이지와 Overview 카드가 공유한다. */
+/** 상세 페이지의 역할 및 기술 정보. */
 export function ProjectHeader({
   study,
-  as: Heading = "h3",
+  as: Heading = "h2",
 }: {
   study: CaseStudyType;
-  /** 상세 페이지에서는 h1, Overview 카드에서는 h3로 쓴다. */
-  as?: "h1" | "h3";
+  as?: "h1" | "h2";
 }) {
   return (
     <header className="print-keep">
@@ -327,19 +339,21 @@ export function ProjectHeader({
         {study.period && <span className="text-[13px] text-faint">{study.period}</span>}
       </div>
       <p className="mt-1.5 text-[16px] text-muted">{study.subtitle}</p>
-      <p className="mt-3 text-[13px] text-faint">
-        {study.context}, {study.role}
-      </p>
-      <p className="mt-3 text-[12.5px] leading-[1.7] text-faint">{study.stack.join(", ")}</p>
+      <p className="mt-3 text-[13px] text-faint">{study.context}</p>
+      <dl className="mt-4 space-y-2 text-[13px] leading-[1.7]">
+        <div className="grid grid-cols-[48px_1fr] gap-3"><dt className="text-muted">역할</dt><dd>{study.role}</dd></div>
+        <div className="grid grid-cols-[48px_1fr] gap-3"><dt className="text-muted">기술</dt><dd>{study.stack.join(", ")}</dd></div>
+      </dl>
     </header>
   );
 }
 
 const sectionLabels: Record<string, string> = {
-  Overview: "프로그램 소개",
-  Problem: "만든 이유",
+  Overview: "프로그램 목적",
+  Problem: "문제 정의",
   Product: "작동 원리",
-  "System Architecture": "구성 요소와 연결",
+  "System Architecture": "전체 아키텍처",
+  "Design Decisions": "설계 이유",
   Development: "내가 맡은 부분",
   Results: "확인한 결과",
 };
@@ -348,39 +362,46 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
   const cover = study.cover?.src.endsWith("/architecture.svg") ? undefined : study.cover;
   const media = study.sections
     .flatMap((section) => section.blocks)
-    .filter((block) => (block.kind === "screens" && !block.items.some((item) => item.src.endsWith("/architecture.svg"))) || block.kind === "video");
+    .flatMap((block): Block[] => {
+      if (block.kind === "video") return [block];
+      if (block.kind !== "screens") return [];
+      const items = block.items.filter((item) => !item.src.endsWith("/architecture.svg") && item.src !== cover?.src);
+      return items.length ? [{ ...block, items }] : [];
+    });
+  const mediaSection = (cover || media.length > 0) ? (
+    <section id="demo" className="scroll-mt-8 border-t border-rule pt-5">
+      <h2 className="text-[14px] font-semibold">화면과 시연</h2>
+      <div className="mt-5 space-y-8">
+        {media.filter((block) => block.kind === "video").map((block, i) => <BlockView key={`video-${i}`} block={block} />)}
+        {cover && !media.some((block) => block.kind === "video" && block.poster === cover.src) && <ProjectCover cover={cover} />}
+        {media.filter((block) => block.kind === "screens").map((block, i) => <BlockView key={`screens-${i}`} block={block} />)}
+      </div>
+    </section>
+  ) : null;
 
   return (
     <article className="print-section border-t border-ink pt-8">
       <ProjectHeader study={study} as="h1" />
       {study.links && (
         <div id={study.slug === "prompt-airlock" ? "presentation-materials" : undefined} className="mt-6">
-          <ProjectLinks links={{ ...study.links, caseStudy: undefined }} />
+          <ProjectLinks links={{ ...study.links, caseStudy: undefined }} grouped />
         </div>
       )}
 
       <div className="mt-10 space-y-10 print:mt-6 print:space-y-6">
         {study.sections.filter((section) => section.heading !== "화면과 시연").map((section) => (
-          <section key={section.heading} className="print-keep">
-            <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">
-              {sectionLabels[section.heading] ?? section.heading}
-            </h2>
-            <div className="space-y-4">
-              {section.blocks.map((block, i) => <BlockView key={i} block={block} />)}
-            </div>
-          </section>
+          <div key={section.heading} className="space-y-10 print:space-y-6">
+            <section id={section.heading === "System Architecture" ? "architecture" : undefined} className="print-keep scroll-mt-8">
+              <h2 className="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em] text-faint">
+                {sectionLabels[section.heading] ?? section.heading}
+              </h2>
+              <div className="space-y-4">
+                {section.blocks.map((block, i) => <BlockView key={i} block={block} />)}
+              </div>
+            </section>
+            {section.heading === "Overview" && mediaSection}
+          </div>
         ))}
-        {(cover || media.length > 0) && (
-          <section className="border-t border-rule pt-5">
-            <h2 className="text-[14px] font-semibold">화면과 시연</h2>
-            <div className="mt-5 space-y-8">
-              {cover && <ProjectCover cover={cover} />}
-              {media.map((block, i) => (
-                <BlockView key={i} block={block.kind === "screens" ? { ...block, items: block.items.filter((item) => item.src !== study.cover?.src) } : block} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
     </article>
   );

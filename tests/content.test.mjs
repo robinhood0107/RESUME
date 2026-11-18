@@ -281,7 +281,7 @@ test("동영상 자산은 MP4와 WebM 대체본 및 설명을 포함한다", () 
 
 
 test("공개 이력서는 비식별 이름을 쓰고 학력 항목을 노출하지 않는다", () => {
-  assert.equal(resume.ko.name, "개발 포트폴리오");
+  assert.equal(resume.ko.name, "이력서");
   assert.equal(resume.en.name, "Developer Portfolio");
   assert.equal(resume.ko.sections.some(s => s.id === "education"), false);
   assert.equal(resume.en.sections.some(s => s.id === "education"), false);

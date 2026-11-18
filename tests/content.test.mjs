@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 const studies = JSON.parse(readFileSync(new URL("../src/data/case-studies.json", import.meta.url)));
 const resume = JSON.parse(readFileSync(new URL("../src/data/resume.json", import.meta.url)));
 const learning = JSON.parse(readFileSync(new URL("../src/data/learning.json", import.meta.url)));
+const explanations = JSON.parse(readFileSync(new URL("../src/data/project-explanations.json", import.meta.url)));
 const datePattern = /\b20\d{2}-\d{2}-\d{2}\b|20\d{2}년\s*\d{1,2}월\s*\d{1,2}일/;
 const captionText = data => JSON.stringify(data.flatMap(study => study.sections.flatMap(section => section.blocks).flatMap(block => block.kind === "screens" ? block.items.map(item => item.caption) : block.kind === "video" ? [block.description] : [])));
 
@@ -157,9 +158,9 @@ test("이력서의 모든 프로젝트가 상세 페이지로 연결된다", () 
 
 test("개인정보와 원본 작성자의 콘텐츠가 데이터에 남지 않는다", () => {
   const profile = readFileSync(new URL("../src/data/profile.ts", import.meta.url), "utf8");
-  const content = JSON.stringify({ studies, resume, profile, learning });
+  const content = JSON.stringify({ studies, resume, profile, learning, explanations });
   assert.doesNotMatch(content, /mark77234|Byeongchan|이병찬|DailyOPIc|KillingPart|\bMARS\b|private-reference|sources_private|[A-Z]:\\|\/mnt\/c\/|\/home\//i);
-  const publicCases = JSON.stringify({ studies, learning });
+  const publicCases = JSON.stringify({ studies, learning, explanations });
   assert.ok(!/(?:생년월일|주민등록번호|birth\s*date)\s*[:：]?\s*\d|(?:\+82[- .]?)?0?1[016789][- .]\d{3,4}[- .]\d{4}\b|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|(?:api[_-]?key|secret[_-]?key|access[_-]?token)\s*[:=]\s*[A-Za-z0-9_-]{16,}/i.test(publicCases), "사례 또는 학습 자료의 개인정보나 키 패턴 확인 필요");
   assert.doesNotMatch(captionText(studies), datePattern);
 });
@@ -189,6 +190,7 @@ test("목록은 소개와 수치, 대표 이미지와 단일 상세 링크를 �
     "@/components/ProjectLinks": { __esModule: true, default: () => null },
     "@/components/PrintButton": { __esModule: true, default: () => null },
     "@/data/caseStudies": { caseStudies: studies },
+    "@/data/project-explanations.json": { __esModule: true, default: explanations },
     "next/image": { __esModule: true, default: props => createElement("img", props) },
     "next/link": { __esModule: true, default: props => createElement("a", props) },
   };
@@ -224,6 +226,16 @@ test("목록은 소개와 수치, 대표 이미지와 단일 상세 링크를 �
   const noRepeatedCover = renderToStaticMarkup(createElement(compiledModule.exports.default, { study: architectureOnly }));
   assert.equal((noRepeatedCover.match(/src="\/RESUME\/images\/example\/architecture.svg"/g) || []).length, 1);
   assert.doesNotMatch(noRepeatedCover, /화면과 시연 보기/);
+  const withExplanation = { ...study, slug: studies[0].slug };
+  const folded = renderToStaticMarkup(createElement(compiledModule.exports.default, { study: withExplanation }));
+  assert.match(folded, /<details id="explanation"/);
+  assert.doesNotMatch(folded.match(/<details[^>]*>/)[0], /\sopen(?:=|\s|>)/);
+  assert.match(folded, /<summary[^>]*>설명<\/summary>/);
+  assert.ok(folded.includes(explanations[studies[0].slug].sections[0].heading));
+  assert.ok(folded.indexOf('</details>') < folded.indexOf('id="demo"'), '기존 사진과 영상은 토글 밖에 유지');
+  const codeExample = { ...study, sections: [{ heading: 'Example', blocks: [{ kind: 'code', language: 'text', code: 'x < y & z' }] }] };
+  const codeHtml = renderToStaticMarkup(createElement(compiledModule.exports.default, { study: codeExample }));
+  assert.match(codeHtml, /<code>x &lt; y &amp; z<\/code>/);
 
   const listSource = readFileSync(new URL("../src/app/portfolio/page.tsx", import.meta.url), "utf8");
   const listModule = { exports: {} };
@@ -232,7 +244,7 @@ test("목록은 소개와 수치, 대표 이미지와 단일 상세 링크를 �
   const list = renderToStaticMarkup(createElement(listModule.exports.default));
   assert.equal((list.match(/<article/g) || []).length, studies.length);
   assert.equal((list.match(/<img/g) || []).length, studies.length);
-  assert.doesNotMatch(list, /<video|전체 아키텍처와 설계 이유 →|프로젝트 상세 →/);
+  assert.doesNotMatch(list, /<video|<details|전체 아키텍처와 설계 이유 →|프로젝트 상세 →/);
   assert.equal((list.match(/자세히 보기 →/g) || []).length, studies.length);
   for (const project of studies) {
     assert.equal(list.split(`href="${project.links.caseStudy}"`).length - 1, 1, project.slug);
@@ -253,6 +265,25 @@ test("목록은 소개와 수치, 대표 이미지와 단일 상세 링크를 �
       if (block.kind === "text" && block.text !== overview && block.text !== result) assert.ok(!list.includes(renderToStaticMarkup(block.text)), `${project.slug}: 목록에 상세 설명 노출`);
       if (block.kind === "screens") for (const shot of block.items) assert.ok(detail.includes(`/RESUME${shot.src}`), shot.src);
       if (block.kind === "video") for (const source of block.sources) assert.ok(detail.includes(`/RESUME${source.src}`), source.src);
+    }
+  }
+});
+
+test("모든 프로젝트 설명에 고정 코드 근거가 있고 공개 제외 및 채용 문구가 없다", () => {
+  assert.deepEqual(Object.keys(explanations).sort(), studies.map(study => study.slug).sort());
+  assert.doesNotMatch(JSON.stringify(explanations), /DB Inc|DBA|자소서|면접 준비|면접 대비|제출 PT|발표 대본|3C4P|\[확인 필요\]/);
+  assert.doesNotMatch(JSON.stringify(explanations['trading-coach']), /RAG|pg_trgm|similarity|V179|V180|V181|V182|25\.6|416ms/i);
+  for (const study of studies) {
+    const guide = explanations[study.slug];
+    assert.equal(guide.repository, study.links.github);
+    assert.match(guide.revision, /^[0-9a-f]{40}$/);
+    assert.equal(new Set(guide.sections.map(section => section.heading)).size, guide.sections.length);
+    const evidence = guide.sections.find(section => section.heading === '구현 근거');
+    assert.ok(evidence);
+    for (const link of evidence.blocks[0].items) assert.ok(link.href.startsWith(`${guide.repository}/blob/${guide.revision}/`));
+    for (const section of guide.sections) for (const block of section.blocks) {
+      if (block.kind === 'table') for (const row of block.rows) assert.equal(row.length, block.headers.length);
+      if (block.kind === 'code') assert.ok(block.code && block.language);
     }
   }
 });

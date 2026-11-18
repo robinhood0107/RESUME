@@ -1,12 +1,14 @@
 import { assetPath } from "@/data/profile";
 import Image from "next/image";
 import ProjectLinks from "@/components/ProjectLinks";
+import explanations from "@/data/project-explanations.json";
 import type {
   Block,
   CaseStudy as CaseStudyType,
   DiagramStage,
   ScreenLayout,
   Screenshot,
+  ProjectExplanation,
 } from "@/data/caseStudies";
 
 /** 서비스 공식 대표 이미지. 원본 비율 그대로, crop·mockup 없이 크게 보여준다. */
@@ -210,9 +212,15 @@ function EngineeringCards({ items }: { items: { title: string; text: string }[] 
 
 function BlockView({ block }: { block: Block }) {
   switch (block.kind) {
+    case "code":
+      return (
+        <pre tabIndex={0} role="region" aria-label={`${block.language} 예시`} className="overflow-x-auto rounded-sm border border-rule bg-[#f8fafc] p-4 text-[12.5px] leading-[1.8]">
+          <code>{block.code}</code>
+        </pre>
+      );
     case "table":
       return (
-        <div className="max-w-full overflow-x-auto" tabIndex={0} role="region" aria-label="측정 조건과 수치 비교표">
+        <div className="max-w-full overflow-x-auto" tabIndex={0} role="region" aria-label="프로젝트 설명 표">
           <table className="w-full min-w-[620px] border-collapse text-left text-[13px] leading-[1.65]">
             <thead>
               <tr>{block.headers.map((header) => <th key={header} className="border-b border-ink px-3 py-2 font-semibold">{header}</th>)}</tr>
@@ -359,6 +367,7 @@ const sectionLabels: Record<string, string> = {
 };
 
 export default function CaseStudy({ study }: { study: CaseStudyType }) {
+  const explanation = (explanations as Record<string, ProjectExplanation>)[study.slug];
   const cover = study.cover?.src.endsWith("/architecture.svg") ? undefined : study.cover;
   const media = study.sections
     .flatMap((section) => section.blocks)
@@ -386,6 +395,23 @@ export default function CaseStudy({ study }: { study: CaseStudyType }) {
         <div id={study.slug === "prompt-airlock" ? "presentation-materials" : undefined} className="mt-6">
           <ProjectLinks links={{ ...study.links, caseStudy: undefined }} grouped />
         </div>
+      )}
+
+      {explanation && (
+        <details id="explanation" className="mt-8 rounded-sm border border-rule px-5 py-4">
+          <summary className="cursor-pointer text-[16px] font-semibold">설명</summary>
+          <div className="mt-8 space-y-10">
+            <p className="text-[12px] text-muted">
+              기준 코드: <a href={`${explanation.repository}/tree/${explanation.revision}`} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-4">{explanation.revision.slice(0, 10)} ↗</a>
+            </p>
+            {explanation.sections.map((section, index) => (
+              <section key={section.heading} className="min-w-0">
+                <h3 className="mb-4 text-[17px] font-semibold">{index + 1}. {section.heading}</h3>
+                <div className="space-y-4">{section.blocks.map((block, i) => <BlockView key={i} block={block} />)}</div>
+              </section>
+            ))}
+          </div>
+        </details>
       )}
 
       <div className="mt-10 space-y-10 print:mt-6 print:space-y-6">

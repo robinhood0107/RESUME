@@ -23,14 +23,14 @@ class References(HTMLParser):
 
 
 def main() -> None:
-    studies = json.loads((ROOT / "src/data/case-studies.json").read_text())
+    studies = json.loads((ROOT / "src/data/case-studies.json").read_text(encoding="utf-8"))
     routes = ["", "resume", "portfolio", *[f"portfolio/{s['slug']}" for s in studies]]
     for route in routes:
         assert (OUTPUT / route / "index.html").is_file(), route
     failures = []
     for page in OUTPUT.rglob("*.html"):
         text = page.read_text(encoding="utf-8")
-        assert not re.search(r"mark77234|Byeongchan|이병찬|DailyOPIc|KillingPart|\bMARS\b", text, re.I), page
+        assert not re.search(r"private-reference|sources_private", text, re.I), page
         parser = References()
         parser.feed(text)
         for ref in parser.paths:

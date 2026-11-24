@@ -32,6 +32,6 @@ python3 scripts/check_export.py
 
 정적 배포 산출물은 `out/`입니다. GitHub Actions는 한·영 PDF와 사이트를 함께 빌드합니다. `main`에 push하거나 `main`에서 수동 실행하면 Pages에 배포하며, PR에서는 빌드만 검증합니다.
 
-수정할 데이터와 화면은 [EDITING.md](EDITING.md)에 정리했습니다. 템플릿 출처는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 기록했습니다.
+수정할 데이터와 화면은 [EDITING.md](EDITING.md)에 정리했습니다. 외부 코드와 의존성 안내는 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 참고하세요.
 
 정적 빌드 결과는 Windows에서 `python scripts/serve_preview.py`로 실행하면 `http://127.0.0.1:18766/RESUME/`에서 확인할 수 있습니다.

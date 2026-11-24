@@ -173,7 +173,6 @@
     "links": {
       "caseStudy": "/portfolio/irya/",
       "github": "https://github.com/kakaotechcampus-4/ktc4-pusan-1",
-      "live": "https://irya.cloud/",
       "demo": "/portfolio/irya/#demo"
     },
     "sections": [
@@ -325,16 +324,16 @@
           },
           {
             "kind": "video",
-            "title": "면접 생성 입력 흐름",
-            "description": "면접 생성에 필요한 정보를 입력하는 화면입니다.",
-            "poster": "/portfolio-media/irya/visible-create.png",
+            "title": "면접 준비부터 면접실까지",
+            "description": "실제 면접 준비 화면과 발표 자료의 녹화 동의·면접실 프로토타입 화면으로 구성한 12초 영상입니다.",
+            "poster": "/portfolio-media/irya/visible-upload.png",
             "sources": [
               {
-                "src": "/portfolio-media/irya/visible-create-flow.mp4",
+                "src": "/portfolio-media/irya/irya-screen-tour.mp4",
                 "type": "video/mp4"
               },
               {
-                "src": "/portfolio-media/irya/visible-create-flow-compat-vp8.webm",
+                "src": "/portfolio-media/irya/irya-screen-tour-compat-vp8.webm",
                 "type": "video/webm"
               }
             ]

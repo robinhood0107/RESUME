@@ -7,7 +7,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "src" / "data" / "resume.json"
 OUTPUT = ROOT / "pdf" / "generated"
-PDF_SECTION_ORDER = ("projects", "skills", "experience", "external_activities")
 FORBIDDEN = re.compile(
     r"(?i)(private-reference|sources_private|[A-Za-z]:\\|/mnt/c/|/home/|"
     r"성적|평점|석차|병역|GPA|class rank|military service|"
@@ -29,7 +28,7 @@ def export_data(source: dict) -> dict:
             right_links = [link["url"] for link in b["additional_links"]]
             if a["link"] != b["link"] or left_links != right_links:
                 raise ValueError(f"한영 링크가 다릅니다: {a['title']}")
-    rank = {name: i for i, name in enumerate(PDF_SECTION_ORDER)}
+    rank = {name: i for i, name in enumerate(source["printSectionOrder"])}
     result = {}
     for language in ("ko", "en"):
         data = source[language]

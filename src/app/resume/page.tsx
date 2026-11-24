@@ -6,6 +6,11 @@ import { skills } from "@/data/skills";
 import { experiences } from "@/data/experience";
 import { resumeProjects } from "@/data/projects";
 import { activities } from "@/data/activities";
+import resume from "@/data/resume.json";
+
+const printSections = [...resume.ko.sections].sort(
+  (left, right) => resume.printSectionOrder.indexOf(left.id) - resume.printSectionOrder.indexOf(right.id),
+);
 
 export const metadata: Metadata = {
   title: "Resume",
@@ -44,9 +49,43 @@ function StackLine({ items }: { items: readonly string[] }) {
   return <p className="mt-2.5 text-[12.5px] text-faint">{items.join(", ")}</p>;
 }
 
-export default function ResumePage() {
+function ResumePrint() {
+  const { name, title, email, github, about } = resume.ko;
+
   return (
-    <div className="mx-auto max-w-[860px] px-5 py-12 sm:px-8 sm:py-16 print:max-w-none print:px-0 print:py-0">
+    <article className="resume-print print-only">
+      <header className="print-keep">
+        <h1>{name}</h1>
+        <p className="resume-print-title">{title}</p>
+        <p className="resume-print-contacts"><a href={`mailto:${email}`}>{email}</a>, <a href={github}>{github}</a></p>
+        <p className="resume-print-about">{about}</p>
+      </header>
+      {printSections.map((section) => (
+        <section key={section.id}>
+          <h2>{section.title}</h2>
+          {section.entries.map((entry) => (
+            <div className="resume-print-entry print-keep" key={entry.title}>
+              <div>
+                <h3>{entry.title}</h3>
+                {entry.subtitle && <p>{entry.subtitle}</p>}
+                {entry.caption && <p>{entry.caption}</p>}
+                {entry.link && <a href={entry.link}>{entry.link_text}</a>}
+                {entry.additional_links.map((link) => <a key={link.url} href={link.url}>{link.title}</a>)}
+              </div>
+              <ul>
+                {entry.bullets.map((bullet) => <li key={bullet}>{bullet}</li>)}
+              </ul>
+            </div>
+          ))}
+        </section>
+      ))}
+    </article>
+  );
+}
+
+export default function ResumePage() {
+  const screen = (
+    <div className="no-print mx-auto max-w-[860px] px-5 py-12 sm:px-8 sm:py-16">
       <div className="no-print mb-8 flex flex-wrap justify-end gap-3 text-[13px] text-muted">
         <a href={assetPath("/assets/pdf/resume-ko.pdf")} target="_blank" rel="noopener noreferrer" className="rounded-sm border border-rule px-3 py-1.5 hover:border-ink hover:text-ink">한국어 PDF 보기와 인쇄 ↗</a>
         <a href={assetPath("/assets/pdf/resume-ko.pdf")} download className="rounded-sm border border-rule px-3 py-1.5 hover:border-ink hover:text-ink">PDF 다운로드 ↓</a>
@@ -61,6 +100,8 @@ export default function ResumePage() {
             <p className="mt-1 text-[15px] text-muted">
               {profile.nameEn}, {profile.role}
             </p>
+            <p className="mt-2 text-[13px] text-muted">닉네임 <span className="text-ink">robinhood0107</span></p>
+            <p className="mt-1 text-[13px] text-muted">관심 분야 <span className="text-ink">백엔드 · 인프라 · LLM AI · Physical AI</span></p>
           </div>
           <ul className="text-[13px] leading-[1.7] text-muted sm:text-right">
             {profile.contacts.map((contact) => (
@@ -158,5 +199,12 @@ export default function ResumePage() {
         </div>
       </section>
     </div>
+  );
+
+  return (
+    <>
+      {screen}
+      <ResumePrint />
+    </>
   );
 }

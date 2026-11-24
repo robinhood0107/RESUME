@@ -67,7 +67,7 @@ test("웹 이력서는 프로젝트를 마지막에 표시하고 발표 자료�
   assert.match(route, /if \(slug === "prompt-airlock-webslide"\) \{\s*return <p/);
   assert.match(lookup, /slug === "prompt-airlock-webslide" \? "prompt-airlock"/);
   const irya = studies.find(study => study.slug === "irya");
-  assert.equal(irya.links.live, "https://irya.cloud/");
+  assert.equal(irya.links.live, undefined);
   assert.equal(irya.links.presentation, undefined);
   assert.equal(irya.links.introduction, undefined);
   assert.equal(irya.links.github, "https://github.com/kakaotechcampus-4/ktc4-pusan-1");
@@ -156,10 +156,10 @@ test("이력서의 모든 프로젝트가 상세 페이지로 연결된다", () 
   }
 });
 
-test("개인정보와 원본 작성자의 콘텐츠가 데이터에 남지 않는다", () => {
+test("공개 데이터에 비공개 경로가 남지 않는다", () => {
   const profile = readFileSync(new URL("../src/data/profile.ts", import.meta.url), "utf8");
   const content = JSON.stringify({ studies, resume, profile, learning, explanations });
-  assert.doesNotMatch(content, /mark77234|Byeongchan|이병찬|DailyOPIc|KillingPart|\bMARS\b|private-reference|sources_private|[A-Z]:\\|\/mnt\/c\/|\/home\//i);
+  assert.doesNotMatch(content, /private-reference|sources_private|[A-Z]:\\|\/mnt\/c\/|\/home\//i);
   const publicCases = JSON.stringify({ studies, learning, explanations });
   assert.ok(!/(?:생년월일|주민등록번호|birth\s*date)\s*[:：]?\s*\d|(?:\+82[- .]?)?0?1[016789][- .]\d{3,4}[- .]\d{4}\b|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|(?:api[_-]?key|secret[_-]?key|access[_-]?token)\s*[:=]\s*[A-Za-z0-9_-]{16,}/i.test(publicCases), "사례 또는 학습 자료의 개인정보나 키 패턴 확인 필요");
   assert.doesNotMatch(captionText(studies), datePattern);

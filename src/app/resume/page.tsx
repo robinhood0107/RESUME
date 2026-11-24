@@ -61,6 +61,8 @@ export default function ResumePage() {
             <p className="mt-1 text-[15px] text-muted">
               {profile.nameEn}, {profile.role}
             </p>
+            <p className="mt-2 text-[13px] text-muted">닉네임 <span className="text-ink">robinhood0107</span></p>
+            <p className="mt-1 text-[13px] text-muted">관심 분야 <span className="text-ink">백엔드 · 인프라 · LLM AI · Physical AI</span></p>
           </div>
           <ul className="text-[13px] leading-[1.7] text-muted sm:text-right">
             {profile.contacts.map((contact) => (

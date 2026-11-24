@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default function PortfolioPage() {
   return (
-    <div className="mx-auto max-w-[860px] px-5 py-12 sm:px-8 sm:py-16 print:max-w-none print:px-0 print:py-0">
+    <div className="portfolio-print mx-auto max-w-[860px] px-5 py-12 sm:px-8 sm:py-16 print:max-w-none print:px-0 print:py-0">
       <div className="no-print mb-8 flex justify-end">
         <PrintButton />
       </div>
@@ -35,16 +35,16 @@ export default function PortfolioPage() {
         </ul>
       </nav>
 
-      <section className="mt-12" aria-label="대표 프로젝트 소개">
-        <div className="space-y-16 print:space-y-10">
+      <section className="mt-12 print:mt-6" aria-label="대표 프로젝트 소개">
+        <div className="space-y-16 print:space-y-6">
           {caseStudies.map((study) => {
             const overview = study.sections.find((section) => section.heading === "Overview")?.blocks.find((block) => block.kind === "text");
             const result = study.sections.find((section) => section.heading === "Results")?.blocks.find((block) => block.kind === "text");
             const metrics = study.sections.find((section) => section.heading === "Results")?.blocks.find((block) => block.kind === "metrics");
 
             return (
-              <article id={study.slug} key={study.slug} className="print-section scroll-mt-8 border-t border-ink pt-8">
-                <Link href={`/portfolio/${study.slug}/`} aria-label={`${study.name} 자세히 보기`} className="group block">
+              <article id={study.slug} key={study.slug} className="print-keep scroll-mt-8 border-t border-ink pt-8 print:pt-4">
+                <Link href={`/portfolio/${study.slug}/`} aria-label={`${study.name} 자세히 보기`} className="portfolio-card group block">
                   <ProjectHeader study={study} />
                   {overview?.kind === "text" && <p className="mt-8 text-[15px] leading-[1.8]">{overview.text}</p>}
                   {result?.kind === "text" && <p className="mt-4 text-[14px] leading-[1.75] text-muted">{result.text}</p>}
@@ -59,7 +59,7 @@ export default function PortfolioPage() {
                       className="mt-6 h-auto max-h-[360px] w-full border border-rule object-contain"
                     />
                   )}
-                  <span className="mt-5 inline-block text-[14px] text-accent underline underline-offset-4 group-hover:decoration-2">자세히 보기 →</span>
+                  <span className="no-print mt-5 inline-block text-[14px] text-accent underline underline-offset-4 group-hover:decoration-2">자세히 보기 →</span>
                 </Link>
               </article>
             );

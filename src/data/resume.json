@@ -1,4 +1,5 @@
 {
+  "printSectionOrder": ["projects", "skills", "experience", "external_activities"],
   "ko": {
     "language": "ko",
     "name": "이력서",

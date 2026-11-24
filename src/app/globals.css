@@ -35,9 +35,13 @@ body {
 
 /* 인쇄 화면 */
 
+.print-only {
+  display: none;
+}
+
 @page {
   size: A4;
-  margin: 14mm 16mm;
+  margin: 0;
 }
 
 @media print {
@@ -45,22 +49,130 @@ body {
   body {
     background: #fff !important;
     color: #000 !important;
-    font-size: 10pt;
+    height: auto;
+    min-height: 0;
+    font-family: NanumGothic, "Nanum Gothic", var(--font-sans);
+    font-size: 9pt;
+  }
+
+  body {
+    display: block;
+  }
+
+  /* 브라우저 인쇄 여백을 ‘없음’으로 골라도 각 장에 문서 여백을 남긴다. */
+  body > main {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding: 11mm 19mm;
   }
 
   .no-print {
     display: none !important;
   }
 
-  /*
-   * PDF에서도 클릭 가능한 링크임이 보이도록 색과 밑줄을 남긴다.
-   * 사이트 nav·footer와 페이지 내 이동 링크는 .no-print이라 인쇄본에 남는 a는
-   * 연락처·스토어·상세 링크뿐이다.
-   */
+  .print-only {
+    display: block;
+  }
+
   a[href] {
-    color: var(--color-accent) !important;
+    color: #2a6f9e !important;
     text-decoration: underline;
     text-underline-offset: 2px;
+  }
+
+  .resume-print,
+  .portfolio-print {
+    line-height: 1.35;
+  }
+
+  .resume-print h1,
+  .portfolio-print h1 {
+    font-size: 20pt;
+    line-height: 1.15;
+  }
+
+  .resume-print h2,
+  .portfolio-print h2 {
+    border-bottom: 0.45pt solid #ddd;
+    padding-bottom: 3pt;
+    margin-bottom: 4pt;
+    color: #111;
+    font-size: 12pt;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  .resume-print-title,
+  .resume-print-contacts,
+  .resume-print-entry > div {
+    color: #666;
+  }
+
+  .resume-print-title {
+    font-size: 10pt;
+  }
+
+  .resume-print-contacts {
+    margin-block: 5pt;
+    border-top: 0.8pt solid #ddd;
+    padding-top: 5pt;
+    font-size: 8pt;
+  }
+
+  .resume-print-about {
+    white-space: pre-line;
+  }
+
+  .resume-print section {
+    margin-top: 5pt;
+  }
+
+  .resume-print-entry {
+    display: grid;
+    grid-template-columns: 28% 1fr;
+    gap: 10pt;
+    margin-bottom: 4pt;
+    font-size: 8.7pt;
+  }
+
+  .resume-print-entry h3 {
+    color: #111;
+    font-size: 9.4pt;
+  }
+
+  .resume-print-entry > div {
+    font-size: 8pt;
+  }
+
+  .resume-print-entry a {
+    display: block;
+  }
+
+  .resume-print-entry ul {
+    padding-left: 9pt;
+    list-style-type: disc;
+  }
+
+  .portfolio-print table {
+    min-width: 0;
+  }
+
+  .portfolio-print pre {
+    white-space: pre-wrap;
+  }
+
+  .portfolio-card[href] {
+    color: inherit !important;
+    text-decoration: none;
+  }
+
+  .portfolio-card h2 {
+    color: #2a6f9e;
+    text-decoration: underline;
+  }
+
+  .portfolio-card img {
+    max-height: 55mm;
   }
 
   /* 항목 제목과 본문이 서로 다른 페이지로 나뉘지 않게 한다. */

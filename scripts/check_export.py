@@ -51,6 +51,13 @@ def main() -> None:
                 failures.append(f"{page.relative_to(OUTPUT)}: 파일 없음 {ref}")
     if failures:
         raise SystemExit("\n".join(sorted(set(failures))))
+    resume = json.loads((ROOT / "src/data/resume.json").read_text(encoding="utf-8"))
+    section_titles = {section["id"]: section["title"] for section in resume["ko"]["sections"]}
+    for route in ("", "resume"):
+        page = (OUTPUT / route / "index.html").read_text(encoding="utf-8")
+        printable = page.partition('class="resume-print print-only"')[2]
+        positions = [printable.index(f">{section_titles[section]}</h2>") for section in resume["printSectionOrder"]]
+        assert positions == sorted(positions), route
     for language in ("ko", "en"):
         assert (OUTPUT / f"assets/pdf/resume-{language}.pdf").stat().st_size > 0
     english_entry = (OUTPUT / "en/index.html").read_text(encoding="utf-8")

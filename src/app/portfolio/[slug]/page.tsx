@@ -40,7 +40,7 @@ export default async function CaseStudyPage({ params }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-[860px] px-5 py-12 sm:px-8 sm:py-16 print:max-w-none print:px-0 print:py-0">
+    <div className="portfolio-print mx-auto max-w-[860px] px-5 py-12 sm:px-8 sm:py-16 print:max-w-none print:px-0 print:py-0">
       <div className="no-print mb-8 flex items-center justify-between gap-4">
         <Link
           href="/portfolio/"
@@ -53,7 +53,7 @@ export default async function CaseStudyPage({ params }: Props) {
 
       <CaseStudy study={study} />
 
-      <div className="mt-16 border-t border-rule pt-6">
+      <div className="no-print mt-16 border-t border-rule pt-6">
         {study.links && <ProjectLinks links={{ ...study.links, caseStudy: undefined, ...(study.slug === "prompt-airlock" ? { presentation: undefined } : {}) }} />}
         <p className="no-print mt-3">
           <Link

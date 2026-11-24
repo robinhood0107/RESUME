@@ -308,12 +308,13 @@ function BlockView({ block }: { block: Block }) {
 
     case "video":
       return (
-        <figure>
-          <video controls playsInline preload="metadata" poster={assetPath(block.poster)} aria-label={block.title} className="h-auto max-h-[520px] w-full border border-rule bg-[#f8fafc] object-contain">
+        <figure className="print-keep">
+          <video controls playsInline preload="metadata" poster={assetPath(block.poster)} aria-label={block.title} className="no-print h-auto max-h-[520px] w-full border border-rule bg-[#f8fafc] object-contain">
             {block.sources.map((source) => <source key={source.src} src={assetPath(source.src)} type={source.type} />)}
             {block.captions && <track kind="captions" src={assetPath(block.captions.src)} srcLang={block.captions.srcLang} label={block.captions.label} default />}
             {block.sources.map((source) => <a key={source.src} href={assetPath(source.src)} download>영상 내려받기 ({source.type === "video/mp4" ? "MP4" : "WebM"})</a>)}
           </video>
+          <Image src={assetPath(block.poster)} alt="" width={960} height={540} className="print-only h-auto max-h-[55mm] w-full object-contain" />
           <figcaption className="mt-2 text-[13px] leading-[1.7] text-muted">
             <span className="block font-semibold">{block.title}</span>
             {block.description !== block.title && <span className="block">{block.description}</span>}

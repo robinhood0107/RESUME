@@ -67,7 +67,7 @@ test("웹 이력서는 프로젝트를 마지막에 표시하고 발표 자료�
   assert.match(route, /if \(slug === "prompt-airlock-webslide"\) \{\s*return <p/);
   assert.match(lookup, /slug === "prompt-airlock-webslide" \? "prompt-airlock"/);
   const irya = studies.find(study => study.slug === "irya");
-  assert.equal(irya.links.live, "https://irya.cloud/");
+  assert.equal(irya.links.live, undefined);
   assert.equal(irya.links.presentation, undefined);
   assert.equal(irya.links.introduction, undefined);
   assert.equal(irya.links.github, "https://github.com/kakaotechcampus-4/ktc4-pusan-1");
